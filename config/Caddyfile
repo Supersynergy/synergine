@@ -203,3 +203,56 @@ http://localhost/analytics, https://localhost/analytics {
 		header_up X-Forwarded-Host {host}
 	}
 }
+
+# Cube.js semantic analytics layer
+http://localhost/cube, https://localhost/cube {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Apply CORS headers
+	import cors_headers
+
+	# Reverse proxy to Cube.js
+	reverse_proxy http://cube:4000 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+
+		# Cube.js needs streaming support
+		flush_interval -1
+	}
+}
+
+# Dozzle — Docker log viewer
+http://localhost/logs, https://localhost/logs {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Reverse proxy to Dozzle
+	reverse_proxy http://dozzle:8080 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}
+
+# Portainer — Container management
+http://localhost/containers, https://localhost/containers {
+	log {
+		output stdout
+		format json
+	}
+
+	# Reverse proxy to Portainer
+	reverse_proxy http://portainer:9443 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}

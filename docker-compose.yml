@@ -78,6 +78,9 @@ volumes:
   # Analytics — Umami
   umami-db-data:
 
+  # Visualization — Portainer
+  portainer-data:
+
 # =============================================================================
 # SERVICES
 # =============================================================================
@@ -1097,3 +1100,83 @@ services:
       superstack.profile: "storage"
       superstack.url: "http://localhost:3500"
       superstack.description: "Privacy-focused web analytics"
+
+  # ===========================================================================
+  # VISUALIZATION & CONTROL PLANE (Profile: dashboard)
+  # ===========================================================================
+
+  # Cube.js — Semantic analytics layer
+  cube:
+    image: cubejs/cube:latest
+    container_name: superstack-cube
+    restart: unless-stopped
+    profiles: [dashboard]
+    ports:
+      - "${CUBE_PORT:-4000}:4000"
+      - "${CUBE_PLAYGROUND_PORT:-4001}:4000"
+    environment:
+      CUBEJS_DEV_MODE: "true"
+      CUBEJS_DB_TYPE: "postgres"
+      CUBEJS_API_SECRET: "${CUBE_API_SECRET:-superstack-cube-secret}"
+    volumes:
+      - ./services/cube/schema:/cube/conf/schema
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/readyz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+    labels:
+      superstack.service: "cube"
+      superstack.profile: "dashboard"
+
+  # Dozzle — Real-time Docker log viewer
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: superstack-dozzle
+    restart: unless-stopped
+    profiles: [dashboard]
+    ports:
+      - "${DOZZLE_PORT:-9999}:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - superstack
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+    labels:
+      superstack.service: "dozzle"
+      superstack.profile: "dashboard"
+
+  # Portainer CE — Container management UI
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: superstack-portainer
+    restart: unless-stopped
+    profiles: [dashboard]
+    ports:
+      - "${PORTAINER_PORT:-9443}:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer-data:/data
+    networks:
+      - superstack
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+    labels:
+      superstack.service: "portainer"
+      superstack.profile: "dashboard"

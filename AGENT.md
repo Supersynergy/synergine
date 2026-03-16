@@ -1411,4 +1411,95 @@ superstack/
 │   ├── agent-example.ts       # Full multi-agent task system example
 │   └── basic-usage.ts         # SDK connection and CRUD example
 └── docs/                      # Additional documentation
+    └── VISUALIZATION.md       # Full visualization stack guide
+
+---
+
+## Visualization & Dashboard
+
+SuperStack includes a full real-time visualization layer built on best-in-class open-source libraries. All widgets connect directly to SurrealDB LIVE SELECT, NATS, and Dragonfly.
+
+### Installed Packages
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `@tremor/react` | ^3.18 | KPI cards, bar/line charts, cost tracker UI |
+| `uplot` | ^1.6 | High-performance time-series (100K pts, 40KB) |
+| `@xyflow/react` | ^12.0 | Agent topology / workflow DAG diagrams |
+| `@sigma/core` | ^3.0 | WebGL network graphs (10K+ nodes) |
+| `@finos/perspective` | ^3.0 | WASM pivot tables (1M+ rows) |
+| `@finos/perspective-viewer` | ^3.0 | Drag-and-drop pivot UI component |
+| `@cubejs-client/core` | ^1.0 | Semantic analytics query layer |
+| `@cubejs-client/react` | ^1.0 | React hooks for Cube.js queries |
+| `d3` | ^7.9 | Custom SVG charts, geo, force layouts |
+| `zustand` | ^5.0 | State management for dashboard store |
+| `next` | ^15.0 | React framework for dashboard app |
+| `react` + `react-dom` | ^19.0 | UI runtime |
+| `tailwindcss` | ^4.0 | Utility CSS |
+| `@tailwindcss/vite` | ^4.0 | Vite integration for Tailwind v4 |
+
+### Dashboard Module
+
+```typescript
+import { createDashboardManager } from "@superstack/sdk/dashboard";
+
+// Connects to SurrealDB LIVE SELECT + NATS + Dragonfly automatically
+const manager = await createDashboardManager();
+
+// Zustand-compatible state store
+const { agents, metrics, flowNodes } = manager.getStore().getState();
+
+// Subscribe to updates
+manager.getStore().subscribe((state) => {
+  console.log("Agents:", state.agents.length);
+});
+
+await manager.disconnect();
+```
+
+### Widget Examples
+
+```typescript
+import { createWidget } from "@superstack/sdk/dashboard/widgets";
+
+// Agent health cards (Tremor)
+const status = createWidget({ id: "status", type: "agent-status", title: "All Agents", showSparkline: true });
+
+// Time-series chart (uPlot, 100K points)
+const chart = createWidget({ id: "throughput", type: "metrics-chart", title: "Tasks/s",
+  series: [{ label: "completed/s", stroke: "#22c55e" }], yAxisLabel: "tasks/s", height: 240 });
+
+// Agent topology diagram (React Flow)
+const flow = createWidget({ id: "topology", type: "agent-flow", title: "Agent Graph",
+  layoutAlgorithm: "dagre", animateActiveEdges: true });
+
+// Cost tracker with budget alerts (Tremor + uPlot)
+const costs = createWidget({ id: "costs", type: "cost-tracker", title: "LLM Spend",
+  budget: { daily: 10, monthly: 200, alertThresholdPct: 80 }, groupBy: "model" });
+```
+
+### SurrealDB LIVE SELECT Examples
+
+```typescript
+// Real-time pipeline — subscribe to all tables
+import { createRealtimePipeline } from "@superstack/sdk/dashboard/realtime";
+
+const pipeline = await createRealtimePipeline({
+  natsSubjects: ["agent.>", "task.>", "metric.>"],
+  dragonflyChannels: ["dashboard:events"],
+});
+
+pipeline.on("event", (event) => {
+  console.log(`[${event.source}] ${event.subject} → ${event.action}`);
+});
+
+// Register a WebSocket client for browser fan-out
+pipeline.registerClient({
+  id: "browser-01",
+  send: (data) => ws.send(data),
+  subjectFilter: "agent",  // only agent table events
+});
+```
+
+See `docs/VISUALIZATION.md` for the full architecture, performance characteristics, and customization guide.
 ```
