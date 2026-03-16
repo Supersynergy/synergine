@@ -1,0 +1,205 @@
+{
+	# Global configuration block
+	email {$ACME_EMAIL:admin@example.com}
+
+	# For local development with self-signed certificates
+	acme_ca http://localhost:4001/acme/acme/directory
+
+	# Default HTTPS port for local dev
+	on_demand_tls {
+		ask http://localhost:2019/caddy/certs/on-demand
+	}
+}
+
+# Development configuration - serve over HTTP localhost
+(cors_headers) {
+	header Access-Control-Allow-Origin "*"
+	header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+	header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+	header Access-Control-Max-Age "3600"
+	handle OPTIONS {
+		header Content-Length "0"
+		respond 204
+	}
+}
+
+(rate_limit) {
+	# Rate limiting middleware - adjust values as needed
+	rate {
+		zone general {
+			key {remote_host}
+			rate 100r/s
+		}
+	}
+}
+
+# Main dashboard - localhost:80 and :443
+http://localhost, https://localhost {
+	# Compress responses for better performance
+	encode gzip
+
+	# Log requests
+	log {
+		output stdout
+		format json
+	}
+
+	# Main dashboard reverse proxy (dashboard service assumed on port 3000)
+	reverse_proxy http://host.docker.internal:3000 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}
+
+# SurrealDB API endpoint
+http://localhost/api/surreal, https://localhost/api/surreal {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Apply CORS headers
+	import cors_headers
+
+	# Apply rate limiting
+	import rate_limit
+
+	# Reverse proxy to SurrealDB
+	reverse_proxy http://surrealdb:8000 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+
+		# Preserve request body for RPC calls
+		flush_interval -1
+	}
+}
+
+# Meilisearch API endpoint
+http://localhost/api/search, https://localhost/api/search {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Apply CORS headers
+	import cors_headers
+
+	# Apply rate limiting
+	import rate_limit
+
+	# Reverse proxy to Meilisearch
+	reverse_proxy http://meilisearch:7700 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}
+
+# NATS monitoring UI
+http://localhost/nats, https://localhost/nats {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Reverse proxy to NATS monitoring dashboard
+	reverse_proxy http://nats:8222 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}
+
+# SigNoz monitoring dashboard
+http://localhost/monitoring, https://localhost/monitoring {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Reverse proxy to SigNoz frontend (port 3301)
+	reverse_proxy http://signoz:3301 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}
+
+# Langfuse analytics dashboard
+http://localhost/langfuse, https://localhost/langfuse {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Reverse proxy to Langfuse service
+	reverse_proxy http://langfuse:3100 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}
+
+# Windmill workflow engine
+http://localhost/windmill, https://localhost/windmill {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Apply CORS headers for workflow API
+	import cors_headers
+
+	# Reverse proxy to Windmill
+	reverse_proxy http://windmill:8100 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+
+		# Windmill needs streaming support
+		flush_interval -1
+	}
+}
+
+# Uptime Kuma monitoring
+http://localhost/uptime, https://localhost/uptime {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Reverse proxy to Uptime Kuma
+	reverse_proxy http://uptime-kuma:3200 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}
+
+# Umami analytics platform
+http://localhost/analytics, https://localhost/analytics {
+	encode gzip
+	log {
+		output stdout
+		format json
+	}
+
+	# Apply CORS headers
+	import cors_headers
+
+	# Reverse proxy to Umami
+	reverse_proxy http://umami:3500 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}

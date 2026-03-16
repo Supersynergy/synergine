@@ -1,0 +1,51 @@
+<!-- ClickHouse cluster config for SigNoz -->
+<clickhouse>
+    <!-- Logging -->
+    <logger>
+        <level>warning</level>
+        <console>true</console>
+    </logger>
+
+    <!-- Listen on all interfaces -->
+    <listen_host>0.0.0.0</listen_host>
+
+    <!-- ZooKeeper for replication (single node, still needed for some features) -->
+    <zookeeper>
+        <node>
+            <host>zookeeper</host>
+            <port>2181</port>
+        </node>
+    </zookeeper>
+
+    <!-- Remote servers (single shard, single replica) -->
+    <remote_servers>
+        <cluster>
+            <shard>
+                <replica>
+                    <host>clickhouse</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </cluster>
+    </remote_servers>
+
+    <!-- Macros for cluster configuration -->
+    <macros>
+        <shard>01</shard>
+        <replica>01</replica>
+        <cluster>cluster</cluster>
+    </macros>
+
+    <!-- Mark data directory -->
+    <path>/var/lib/clickhouse/</path>
+    <tmp_path>/var/lib/clickhouse/tmp/</tmp_path>
+    <user_files_path>/var/lib/clickhouse/user_files/</user_files_path>
+    <format_schema_path>/var/lib/clickhouse/format_schemas/</format_schema_path>
+
+    <!-- Max connections -->
+    <max_connections>1000</max_connections>
+    <keep_alive_timeout>10</keep_alive_timeout>
+
+    <!-- Memory limits -->
+    <max_server_memory_usage_to_ram_ratio>0.9</max_server_memory_usage_to_ram_ratio>
+</clickhouse>

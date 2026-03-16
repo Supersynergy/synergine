@@ -1,0 +1,116 @@
+# =============================================================================
+# SigNoz OpenTelemetry Collector Config
+# =============================================================================
+# Receives traces/metrics/logs via OTLP and forwards to ClickHouse.
+# =============================================================================
+
+receivers:
+  otlp/spanmetrics:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:12345
+
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        max_recv_msg_size_mib: 16
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # Prometheus metrics from internal components
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "otel-collector"
+          scrape_interval: 60s
+          static_configs:
+            - targets: ["localhost:8888"]
+
+processors:
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    check_interval: 2s
+    limit_mib: 800
+    spike_limit_mib: 200
+
+  # Span metrics processor for RED metrics
+  spanmetrics:
+    metrics_exporter: prometheus
+    latency_histogram_buckets: [2ms, 4ms, 6ms, 8ms, 10ms, 50ms, 100ms, 200ms, 400ms, 800ms, 1s, 1400ms, 2s, 5s, 10s, 15s]
+    dimensions_cache_size: 100000
+    aggregation_temporality: AGGREGATION_TEMPORALITY_CUMULATIVE
+
+  # Resource detection
+  resourcedetection:
+    detectors: [env, system]
+    timeout: 2s
+    override: false
+
+exporters:
+  clickhousetraces:
+    datasource: "tcp://clickhouse:9000?database=signoz_traces"
+    username: ${SIGNOZ_CLICKHOUSE_USER}
+    password: ${SIGNOZ_CLICKHOUSE_PASSWORD}
+    docker_multi_node_cluster: false
+    low_cardinal_exception_grouping: false
+
+  clickhousemetricswrite:
+    endpoint: "tcp://clickhouse:9000?database=signoz_metrics"
+    username: ${SIGNOZ_CLICKHOUSE_USER}
+    password: ${SIGNOZ_CLICKHOUSE_PASSWORD}
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  clickhouselogsexporter:
+    dsn: "tcp://clickhouse:9000?database=signoz_logs"
+    username: ${SIGNOZ_CLICKHOUSE_USER}
+    password: ${SIGNOZ_CLICKHOUSE_PASSWORD}
+    docker_multi_node_cluster: false
+    timeout: 10s
+
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+
+  # Health check for pipeline
+  debug:
+    verbosity: basic
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resourcedetection]
+      exporters: [clickhousetraces]
+
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, batch]
+      exporters: [clickhousemetricswrite]
+
+    metrics/spanmetrics:
+      receivers: [otlp/spanmetrics]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resourcedetection]
+      exporters: [clickhouselogsexporter]

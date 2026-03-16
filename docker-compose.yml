@@ -1,0 +1,1096 @@
+# =============================================================================
+# SuperStack — Universal AI Company Framework
+# =============================================================================
+# Usage:
+#   Core only (always starts):
+#     docker compose up -d
+#
+#   Core + specific profiles:
+#     docker compose --profile gateway up -d
+#     docker compose --profile search up -d
+#     docker compose --profile monitoring up -d
+#     docker compose --profile workflows up -d
+#     docker compose --profile storage up -d
+#     docker compose --profile email up -d
+#
+#   Full stack (minus coolify):
+#     docker compose --profile gateway --profile search --profile monitoring \
+#       --profile workflows --profile storage --profile email up -d
+#
+#   Stop everything:
+#     docker compose --profile gateway --profile search --profile monitoring \
+#       --profile workflows --profile storage --profile email down
+#
+# Prerequisites:
+#   cp .env.example .env  # then edit secrets
+# =============================================================================
+
+name: superstack
+
+# ---------------------------------------------------------------------------
+# NETWORKS
+# ---------------------------------------------------------------------------
+networks:
+  superstack:
+    name: superstack
+    driver: bridge
+
+# ---------------------------------------------------------------------------
+# VOLUMES — all named for explicit lifecycle management
+# ---------------------------------------------------------------------------
+volumes:
+  # Core
+  surrealdb-data:
+  dragonfly-data:
+  nats-data:
+
+  # Gateway
+  caddy-data:
+  caddy-config:
+
+  # Search
+  meilisearch-data:
+
+  # Monitoring — SigNoz
+  signoz-clickhouse-data:
+  signoz-zookeeper-data:
+  signoz-otel-data:
+
+  # Monitoring — Langfuse
+  langfuse-db-data:
+
+  # Monitoring — misc
+  beszel-data:
+  uptime-kuma-data:
+
+  # Workflows — Windmill
+  windmill-db-data:
+  windmill-worker-data:
+
+  # Email — Listmonk
+  listmonk-db-data:
+  listmonk-uploads:
+
+  # Storage — SeaweedFS
+  seaweedfs-master-data:
+  seaweedfs-volume-data:
+
+  # Analytics — Umami
+  umami-db-data:
+
+# =============================================================================
+# SERVICES
+# =============================================================================
+services:
+
+  # ===========================================================================
+  # CORE — always start (no profile)
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # SurrealDB 3.0 — Multi-model database (SQL + graph + document)
+  # ---------------------------------------------------------------------------
+  surrealdb:
+    image: surrealdb/surrealdb:v2.3.3
+    container_name: superstack-surrealdb
+    restart: unless-stopped
+    command: >
+      start
+      --log info
+      --user ${SURREALDB_USER:-root}
+      --pass ${SURREALDB_PASSWORD:?SURREALDB_PASSWORD required}
+      rocksdb:/data/surreal.db
+    environment:
+      SURREAL_PATH: rocksdb:/data/surreal.db
+      SURREAL_USER: ${SURREALDB_USER:-root}
+      SURREAL_PASS: ${SURREALDB_PASSWORD}
+      SURREAL_LOG: info
+    ports:
+      - "${SURREALDB_PORT:-8000}:8000"
+    volumes:
+      - surrealdb-data:/data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "/surreal", "is-ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    labels:
+      superstack.service: "surrealdb"
+      superstack.profile: "core"
+      superstack.description: "Multi-model database — RocksDB backend"
+
+  # ---------------------------------------------------------------------------
+  # Dragonfly — Redis-compatible cache / message broker (2-25x faster than Redis)
+  # ---------------------------------------------------------------------------
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.27.2
+    container_name: superstack-dragonfly
+    restart: unless-stopped
+    command: >
+      --maxmemory=${DRAGONFLY_MAX_MEMORY:-2gb}
+      --cache_mode
+      --requirepass=${DRAGONFLY_PASSWORD:?DRAGONFLY_PASSWORD required}
+      --loglevel=info
+    ulimits:
+      memlock: -1
+    ports:
+      - "${DRAGONFLY_PORT:-6379}:6379"
+    volumes:
+      - dragonfly-data:/data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${DRAGONFLY_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2560M  # 2GB cache + 512MB overhead
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    labels:
+      superstack.service: "dragonfly"
+      superstack.profile: "core"
+      superstack.description: "Redis-compatible cache — 2GB max, cache_mode"
+
+  # ---------------------------------------------------------------------------
+  # NATS — Cloud-native messaging with JetStream (persistence)
+  # ---------------------------------------------------------------------------
+  nats:
+    image: nats:2.10-alpine
+    container_name: superstack-nats
+    restart: unless-stopped
+    command: >
+      -js
+      -sd /data
+      -m 8222
+      -p 4222
+      --max_payload 8MB
+      --max_connections 10000
+    ports:
+      - "${NATS_CLIENT_PORT:-4222}:4222"
+      - "${NATS_MONITOR_PORT:-8222}:8222"
+    volumes:
+      - nats-data:/data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    labels:
+      superstack.service: "nats"
+      superstack.profile: "core"
+      superstack.description: "Cloud-native messaging — JetStream enabled"
+
+  # ===========================================================================
+  # GATEWAY (profile: gateway)
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # Caddy — Reverse proxy with automatic HTTPS
+  # ---------------------------------------------------------------------------
+  caddy:
+    image: caddy:2.9-alpine
+    container_name: superstack-caddy
+    restart: unless-stopped
+    profiles: [gateway]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    volumes:
+      - ./services/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
+    labels:
+      superstack.service: "caddy"
+      superstack.profile: "gateway"
+      superstack.description: "Reverse proxy — auto HTTPS via Let's Encrypt"
+
+  # ===========================================================================
+  # SEARCH (profile: search)
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # Meilisearch — Fast, typo-tolerant full-text search
+  # ---------------------------------------------------------------------------
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: superstack-meilisearch
+    restart: unless-stopped
+    profiles: [search]
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY required when profile=search}
+      MEILI_DB_PATH: /meili_data
+      MEILI_ENV: ${MEILI_ENV:-production}
+      MEILI_LOG_LEVEL: ${MEILI_LOG_LEVEL:-INFO}
+      MEILI_MAX_INDEXING_MEMORY: ${MEILI_MAX_INDEXING_MEMORY:-1Gb}
+    ports:
+      - "${MEILI_PORT:-7700}:7700"
+    volumes:
+      - meilisearch-data:/meili_data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7700/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    labels:
+      superstack.service: "meilisearch"
+      superstack.profile: "search"
+      superstack.description: "Full-text search engine — typo-tolerant"
+
+  # ===========================================================================
+  # MONITORING (profile: monitoring)
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # SigNoz — OpenTelemetry-native observability (traces + metrics + logs)
+  # SigNoz needs: zookeeper → clickhouse → otel-collector → query-service → frontend
+  # ---------------------------------------------------------------------------
+
+  signoz-zookeeper:
+    image: bitnami/zookeeper:3.7.2
+    container_name: superstack-signoz-zookeeper
+    restart: unless-stopped
+    profiles: [monitoring]
+    hostname: zookeeper
+    environment:
+      ZOO_SERVER_ID: 1
+      ZOO_ENABLE_AUTH: "no"
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      ZOO_HEAP_SIZE: 256
+    volumes:
+      - signoz-zookeeper-data:/bitnami/zookeeper
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    labels:
+      superstack.service: "signoz-zookeeper"
+      superstack.profile: "monitoring"
+
+  signoz-clickhouse:
+    image: clickhouse/clickhouse-server:24.7-alpine
+    container_name: superstack-signoz-clickhouse
+    restart: unless-stopped
+    profiles: [monitoring]
+    hostname: clickhouse
+    environment:
+      CLICKHOUSE_DB: ${SIGNOZ_CLICKHOUSE_DB:-signoz_metrics}
+      CLICKHOUSE_USER: ${SIGNOZ_CLICKHOUSE_USER:-admin}
+      CLICKHOUSE_PASSWORD: ${SIGNOZ_CLICKHOUSE_PASSWORD:?SIGNOZ_CLICKHOUSE_PASSWORD required when profile=monitoring}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    volumes:
+      - signoz-clickhouse-data:/var/lib/clickhouse
+      - ./services/signoz/clickhouse-config.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
+      - ./services/signoz/clickhouse-users.xml:/etc/clickhouse-server/users.d/users.xml:ro
+    networks:
+      - superstack
+    depends_on:
+      signoz-zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 4G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    labels:
+      superstack.service: "signoz-clickhouse"
+      superstack.profile: "monitoring"
+
+  signoz-otel-collector:
+    image: signoz/signoz-otel-collector:0.102.10
+    container_name: superstack-signoz-otel-collector
+    restart: unless-stopped
+    profiles: [monitoring]
+    hostname: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml", "--manager-config=/etc/manager-config.yaml"]
+    environment:
+      OTEL_RESOURCE_ATTRIBUTES: "host.name=signoz-otel-collector,os.type=linux"
+      LOW_CARDINAL_EXCEPTION_GROUPING: "false"
+    volumes:
+      - ./services/signoz/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+      - ./services/signoz/manager-config.yaml:/etc/manager-config.yaml:ro
+      - signoz-otel-data:/var/lib/signoz
+    ports:
+      - "${OTEL_GRPC_PORT:-4317}:4317"   # OTLP gRPC receiver
+      - "${OTEL_HTTP_PORT:-4318}:4318"   # OTLP HTTP receiver
+    networks:
+      - superstack
+    depends_on:
+      signoz-clickhouse:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:13133"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    labels:
+      superstack.service: "signoz-otel-collector"
+      superstack.profile: "monitoring"
+
+  signoz-query-service:
+    image: signoz/query-service:0.54.0
+    container_name: superstack-signoz-query-service
+    restart: unless-stopped
+    profiles: [monitoring]
+    hostname: query-service
+    command: ["-config=/root/config/prometheus.yml"]
+    environment:
+      ClickHouseUrl: "tcp://clickhouse:9000"
+      CLICKHOUSE_DB: ${SIGNOZ_CLICKHOUSE_DB:-signoz_metrics}
+      CLICKHOUSE_USER: ${SIGNOZ_CLICKHOUSE_USER:-admin}
+      CLICKHOUSE_PASSWORD: ${SIGNOZ_CLICKHOUSE_PASSWORD}
+      STORAGE: clickhouse
+      GODEBUG: netdns=go
+      TELEMETRY_ENABLED: "false"
+      DEPLOYMENT_TYPE: docker-standalone-amd
+    volumes:
+      - ./services/signoz/prometheus.yml:/root/config/prometheus.yml:ro
+    networks:
+      - superstack
+    depends_on:
+      signoz-clickhouse:
+        condition: service_healthy
+      signoz-otel-collector:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    labels:
+      superstack.service: "signoz-query-service"
+      superstack.profile: "monitoring"
+
+  signoz-frontend:
+    image: signoz/frontend:0.54.0
+    container_name: superstack-signoz
+    restart: unless-stopped
+    profiles: [monitoring]
+    environment:
+      FRONTEND_API_ENDPOINT: http://query-service:8080
+    ports:
+      - "${SIGNOZ_PORT:-3301}:3301"
+    networks:
+      - superstack
+    depends_on:
+      signoz-query-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3301"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
+    labels:
+      superstack.service: "signoz-frontend"
+      superstack.profile: "monitoring"
+      superstack.url: "http://localhost:3301"
+      superstack.description: "SigNoz observability — traces, metrics, logs"
+
+  # ---------------------------------------------------------------------------
+  # Langfuse — LLM observability & evals (traces, prompts, datasets)
+  # ---------------------------------------------------------------------------
+  langfuse-db:
+    image: postgres:16-alpine
+    container_name: superstack-langfuse-db
+    restart: unless-stopped
+    profiles: [monitoring]
+    environment:
+      POSTGRES_DB: ${LANGFUSE_DB_NAME:-langfuse}
+      POSTGRES_USER: ${LANGFUSE_DB_USER:-langfuse}
+      POSTGRES_PASSWORD: ${LANGFUSE_DB_PASSWORD:?LANGFUSE_DB_PASSWORD required when profile=monitoring}
+    volumes:
+      - langfuse-db-data:/var/lib/postgresql/data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LANGFUSE_DB_USER:-langfuse} -d ${LANGFUSE_DB_NAME:-langfuse}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    labels:
+      superstack.service: "langfuse-db"
+      superstack.profile: "monitoring"
+
+  langfuse:
+    image: langfuse/langfuse:3
+    container_name: superstack-langfuse
+    restart: unless-stopped
+    profiles: [monitoring]
+    environment:
+      DATABASE_URL: "postgresql://${LANGFUSE_DB_USER:-langfuse}:${LANGFUSE_DB_PASSWORD}@langfuse-db:5432/${LANGFUSE_DB_NAME:-langfuse}"
+      NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET:?LANGFUSE_NEXTAUTH_SECRET required when profile=monitoring}
+      NEXTAUTH_URL: ${LANGFUSE_NEXTAUTH_URL:-http://localhost:3100}
+      SALT: ${LANGFUSE_SALT:?LANGFUSE_SALT required when profile=monitoring}
+      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: ${LANGFUSE_EXPERIMENTAL:-false}
+      TELEMETRY_ENABLED: ${LANGFUSE_TELEMETRY:-false}
+      LANGFUSE_INIT_ORG_ID: ${LANGFUSE_INIT_ORG_ID:-superstack}
+      LANGFUSE_INIT_ORG_NAME: ${LANGFUSE_INIT_ORG_NAME:-SuperStack}
+      LANGFUSE_INIT_PROJECT_ID: ${LANGFUSE_INIT_PROJECT_ID:-default}
+      LANGFUSE_INIT_PROJECT_NAME: ${LANGFUSE_INIT_PROJECT_NAME:-Default Project}
+      LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LANGFUSE_INIT_PROJECT_PUBLIC_KEY:-}
+      LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LANGFUSE_INIT_PROJECT_SECRET_KEY:-}
+      LANGFUSE_INIT_USER_EMAIL: ${LANGFUSE_INIT_USER_EMAIL:-admin@superstack.local}
+      LANGFUSE_INIT_USER_NAME: ${LANGFUSE_INIT_USER_NAME:-Admin}
+      LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
+    ports:
+      - "${LANGFUSE_PORT:-3100}:3000"
+    networks:
+      - superstack
+    depends_on:
+      langfuse-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/public/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.1"
+          memory: 256M
+    labels:
+      superstack.service: "langfuse"
+      superstack.profile: "monitoring"
+      superstack.url: "http://localhost:3100"
+      superstack.description: "LLM observability — traces, evals, prompts"
+
+  # ---------------------------------------------------------------------------
+  # Beszel — Lightweight server monitoring hub
+  # ---------------------------------------------------------------------------
+  beszel:
+    image: henrygd/beszel:latest
+    container_name: superstack-beszel
+    restart: unless-stopped
+    profiles: [monitoring]
+    ports:
+      - "${BESZEL_PORT:-8090}:8090"
+    volumes:
+      - beszel-data:/beszel_data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8090"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
+    labels:
+      superstack.service: "beszel"
+      superstack.profile: "monitoring"
+      superstack.url: "http://localhost:8090"
+      superstack.description: "Server monitoring hub — lightweight"
+
+  # ---------------------------------------------------------------------------
+  # Uptime Kuma — Self-hosted uptime monitoring
+  # ---------------------------------------------------------------------------
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: superstack-uptime-kuma
+    restart: unless-stopped
+    profiles: [monitoring]
+    ports:
+      - "${UPTIME_KUMA_PORT:-3200}:3001"
+    volumes:
+      - uptime-kuma-data:/app/data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/entry-page', r => process.exit(r.statusCode===200 ? 0 : 1))"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
+    labels:
+      superstack.service: "uptime-kuma"
+      superstack.profile: "monitoring"
+      superstack.url: "http://localhost:3200"
+      superstack.description: "Uptime monitoring — status pages"
+
+  # ===========================================================================
+  # WORKFLOWS (profile: workflows)
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # Windmill DB — PostgreSQL for Windmill
+  # ---------------------------------------------------------------------------
+  windmill-db:
+    image: postgres:16-alpine
+    container_name: superstack-windmill-db
+    restart: unless-stopped
+    profiles: [workflows]
+    environment:
+      POSTGRES_DB: ${WINDMILL_DB_NAME:-windmill}
+      POSTGRES_USER: ${WINDMILL_DB_USER:-windmill}
+      POSTGRES_PASSWORD: ${WINDMILL_DB_PASSWORD:?WINDMILL_DB_PASSWORD required when profile=workflows}
+    volumes:
+      - windmill-db-data:/var/lib/postgresql/data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${WINDMILL_DB_USER:-windmill} -d ${WINDMILL_DB_NAME:-windmill}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    labels:
+      superstack.service: "windmill-db"
+      superstack.profile: "workflows"
+
+  # ---------------------------------------------------------------------------
+  # Windmill — Developer platform for scripts, flows, apps (open-source)
+  # ---------------------------------------------------------------------------
+  windmill:
+    image: ghcr.io/windmill-labs/windmill:latest
+    container_name: superstack-windmill
+    restart: unless-stopped
+    profiles: [workflows]
+    environment:
+      DATABASE_URL: "postgresql://${WINDMILL_DB_USER:-windmill}:${WINDMILL_DB_PASSWORD}@windmill-db:5432/${WINDMILL_DB_NAME:-windmill}"
+      MODE: server
+      BASE_URL: ${WINDMILL_BASE_URL:-http://localhost:8100}
+      WINDMILL_SECRET: ${WINDMILL_SECRET:?WINDMILL_SECRET required when profile=workflows}
+      JSON_FMT: "true"
+      METRICS_ADDR: "false"
+    ports:
+      - "${WINDMILL_PORT:-8100}:8000"
+    volumes:
+      - windmill-worker-data:/tmp/windmill
+    networks:
+      - superstack
+    depends_on:
+      windmill-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8000"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    labels:
+      superstack.service: "windmill"
+      superstack.profile: "workflows"
+      superstack.url: "http://localhost:8100"
+      superstack.description: "Workflow platform — scripts, flows, apps"
+
+  # ---------------------------------------------------------------------------
+  # Windmill Worker — Separate worker process for job execution
+  # ---------------------------------------------------------------------------
+  windmill-worker:
+    image: ghcr.io/windmill-labs/windmill:latest
+    container_name: superstack-windmill-worker
+    restart: unless-stopped
+    profiles: [workflows]
+    environment:
+      DATABASE_URL: "postgresql://${WINDMILL_DB_USER:-windmill}:${WINDMILL_DB_PASSWORD}@windmill-db:5432/${WINDMILL_DB_NAME:-windmill}"
+      MODE: worker
+      WORKER_GROUP: default
+      WINDMILL_SECRET: ${WINDMILL_SECRET}
+      JSON_FMT: "true"
+    volumes:
+      - windmill-worker-data:/tmp/windmill
+      - /var/run/docker.sock:/var/run/docker.sock  # optional: for Docker-in-Docker workers
+    networks:
+      - superstack
+    depends_on:
+      windmill-db:
+        condition: service_healthy
+      windmill:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f windmill || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    labels:
+      superstack.service: "windmill-worker"
+      superstack.profile: "workflows"
+
+  # ===========================================================================
+  # PLATFORM (profile: platform)
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # Coolify — Self-hosted Heroku/Netlify/Vercel alternative
+  #
+  # NOTE: Coolify manages its own Docker infrastructure and has complex
+  # installation requirements. The recommended approach is to use the
+  # official installer rather than embedding in this compose:
+  #
+  #   curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash
+  #
+  # If you want to run Coolify alongside this stack, use a separate
+  # docker-compose file from the official repo:
+  #   https://github.com/coollabsHQ/coolify/blob/main/docker-compose.yml
+  #
+  # Port: 3000 (default Coolify UI)
+  # ---------------------------------------------------------------------------
+
+  # ===========================================================================
+  # EMAIL (profile: email)
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # Listmonk DB — PostgreSQL for Listmonk
+  # ---------------------------------------------------------------------------
+  listmonk-db:
+    image: postgres:16-alpine
+    container_name: superstack-listmonk-db
+    restart: unless-stopped
+    profiles: [email]
+    environment:
+      POSTGRES_DB: ${LISTMONK_DB_NAME:-listmonk}
+      POSTGRES_USER: ${LISTMONK_DB_USER:-listmonk}
+      POSTGRES_PASSWORD: ${LISTMONK_DB_PASSWORD:?LISTMONK_DB_PASSWORD required when profile=email}
+    volumes:
+      - listmonk-db-data:/var/lib/postgresql/data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LISTMONK_DB_USER:-listmonk} -d ${LISTMONK_DB_NAME:-listmonk}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    labels:
+      superstack.service: "listmonk-db"
+      superstack.profile: "email"
+
+  # ---------------------------------------------------------------------------
+  # Listmonk — Self-hosted newsletter & mailing list manager
+  # ---------------------------------------------------------------------------
+  listmonk:
+    image: listmonk/listmonk:v4.1.0
+    container_name: superstack-listmonk
+    restart: unless-stopped
+    profiles: [email]
+    command: sh -c "yes | ./listmonk --install --idempotent --config /listmonk/config.toml && ./listmonk --config /listmonk/config.toml"
+    environment:
+      LISTMONK_db__host: listmonk-db
+      LISTMONK_db__port: "5432"
+      LISTMONK_db__user: ${LISTMONK_DB_USER:-listmonk}
+      LISTMONK_db__password: ${LISTMONK_DB_PASSWORD}
+      LISTMONK_db__database: ${LISTMONK_DB_NAME:-listmonk}
+      LISTMONK_db__ssl_mode: disable
+      LISTMONK_app__admin_username: ${LISTMONK_ADMIN_USER:-admin}
+      LISTMONK_app__admin_password: ${LISTMONK_ADMIN_PASSWORD:?LISTMONK_ADMIN_PASSWORD required when profile=email}
+    ports:
+      - "${LISTMONK_PORT:-9000}:9000"
+    volumes:
+      - listmonk-uploads:/listmonk/uploads
+      - ./services/listmonk/config.toml:/listmonk/config.toml:ro
+    networks:
+      - superstack
+    depends_on:
+      listmonk-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9000"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
+    labels:
+      superstack.service: "listmonk"
+      superstack.profile: "email"
+      superstack.url: "http://localhost:9000"
+      superstack.description: "Newsletter & mailing list manager"
+
+  # ===========================================================================
+  # STORAGE (profile: storage)
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # SeaweedFS Master — Distributed object storage (S3-compatible)
+  # ---------------------------------------------------------------------------
+  seaweedfs-master:
+    image: chrislusf/seaweedfs:3.77
+    container_name: superstack-seaweedfs-master
+    restart: unless-stopped
+    profiles: [storage]
+    command: master -ip=seaweedfs-master -port=9333 -mdir=/data
+    ports:
+      - "${SEAWEEDFS_MASTER_PORT:-9333}:9333"
+    volumes:
+      - seaweedfs-master-data:/data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9333/cluster/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    labels:
+      superstack.service: "seaweedfs-master"
+      superstack.profile: "storage"
+
+  # ---------------------------------------------------------------------------
+  # SeaweedFS Volume — Volume server for actual file storage
+  # ---------------------------------------------------------------------------
+  seaweedfs-volume:
+    image: chrislusf/seaweedfs:3.77
+    container_name: superstack-seaweedfs-volume
+    restart: unless-stopped
+    profiles: [storage]
+    command: volume -mserver=seaweedfs-master:9333 -port=8080 -dir=/data -max=50
+    ports:
+      - "${SEAWEEDFS_VOLUME_PORT:-8080}:8080"
+    volumes:
+      - seaweedfs-volume-data:/data
+    networks:
+      - superstack
+    depends_on:
+      seaweedfs-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    labels:
+      superstack.service: "seaweedfs-volume"
+      superstack.profile: "storage"
+
+  # ---------------------------------------------------------------------------
+  # SeaweedFS S3 — S3-compatible API gateway for SeaweedFS
+  # ---------------------------------------------------------------------------
+  seaweedfs-s3:
+    image: chrislusf/seaweedfs:3.77
+    container_name: superstack-seaweedfs-s3
+    restart: unless-stopped
+    profiles: [storage]
+    command: >
+      s3
+      -port=8333
+      -filer=seaweedfs-filer:8888
+      -config=/etc/seaweedfs/s3.json
+    ports:
+      - "${SEAWEEDFS_S3_PORT:-8333}:8333"
+    volumes:
+      - ./services/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+    networks:
+      - superstack
+    depends_on:
+      seaweedfs-filer:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8333"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
+    labels:
+      superstack.service: "seaweedfs-s3"
+      superstack.profile: "storage"
+      superstack.description: "S3-compatible API — port 8333"
+
+  # ---------------------------------------------------------------------------
+  # SeaweedFS Filer — Metadata server (required for S3 API)
+  # ---------------------------------------------------------------------------
+  seaweedfs-filer:
+    image: chrislusf/seaweedfs:3.77
+    container_name: superstack-seaweedfs-filer
+    restart: unless-stopped
+    profiles: [storage]
+    command: filer -master=seaweedfs-master:9333
+    networks:
+      - superstack
+    depends_on:
+      seaweedfs-master:
+        condition: service_healthy
+      seaweedfs-volume:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8888/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    labels:
+      superstack.service: "seaweedfs-filer"
+      superstack.profile: "storage"
+
+  # ---------------------------------------------------------------------------
+  # Umami DB — PostgreSQL for Umami analytics
+  # ---------------------------------------------------------------------------
+  umami-db:
+    image: postgres:16-alpine
+    container_name: superstack-umami-db
+    restart: unless-stopped
+    profiles: [storage]
+    environment:
+      POSTGRES_DB: ${UMAMI_DB_NAME:-umami}
+      POSTGRES_USER: ${UMAMI_DB_USER:-umami}
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD:?UMAMI_DB_PASSWORD required when profile=storage}
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    networks:
+      - superstack
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${UMAMI_DB_USER:-umami} -d ${UMAMI_DB_NAME:-umami}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    labels:
+      superstack.service: "umami-db"
+      superstack.profile: "storage"
+
+  # ---------------------------------------------------------------------------
+  # Umami — Privacy-focused web analytics (GA alternative)
+  # ---------------------------------------------------------------------------
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: superstack-umami
+    restart: unless-stopped
+    profiles: [storage]
+    environment:
+      DATABASE_URL: "postgresql://${UMAMI_DB_USER:-umami}:${UMAMI_DB_PASSWORD}@umami-db:5432/${UMAMI_DB_NAME:-umami}"
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${UMAMI_APP_SECRET:?UMAMI_APP_SECRET required when profile=storage}
+      DISABLE_TELEMETRY: "1"
+    ports:
+      - "${UMAMI_PORT:-3500}:3000"
+    networks:
+      - superstack
+    depends_on:
+      umami-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/heartbeat"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    labels:
+      superstack.service: "umami"
+      superstack.profile: "storage"
+      superstack.url: "http://localhost:3500"
+      superstack.description: "Privacy-focused web analytics"

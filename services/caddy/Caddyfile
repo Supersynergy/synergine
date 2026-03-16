@@ -1,0 +1,116 @@
+# =============================================================================
+# SuperStack Caddyfile
+# =============================================================================
+# Caddy auto-handles HTTPS. For local dev with DOMAIN=localhost,
+# it uses self-signed certs. For production, set DOMAIN= to your real domain.
+#
+# Uncomment and customize blocks below for your services.
+# =============================================================================
+
+# Global options
+{
+	email {$ACME_EMAIL:admin@example.com}
+	# Uncomment for staging/testing to avoid Let's Encrypt rate limits:
+	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+# ---------------------------------------------------------------------------
+# SurrealDB — Database API
+# ---------------------------------------------------------------------------
+# surreal.{$DOMAIN} {
+# 	reverse_proxy surrealdb:8000
+# }
+
+# ---------------------------------------------------------------------------
+# Meilisearch — Search API
+# ---------------------------------------------------------------------------
+# search.{$DOMAIN} {
+# 	reverse_proxy meilisearch:7700
+# }
+
+# ---------------------------------------------------------------------------
+# SigNoz — Observability UI
+# ---------------------------------------------------------------------------
+# signoz.{$DOMAIN} {
+# 	reverse_proxy signoz-frontend:3301
+# }
+
+# ---------------------------------------------------------------------------
+# Langfuse — LLM Observability
+# ---------------------------------------------------------------------------
+# langfuse.{$DOMAIN} {
+# 	reverse_proxy langfuse:3000
+# }
+
+# ---------------------------------------------------------------------------
+# Windmill — Workflows
+# ---------------------------------------------------------------------------
+# windmill.{$DOMAIN} {
+# 	reverse_proxy windmill:8000
+# }
+
+# ---------------------------------------------------------------------------
+# Listmonk — Email
+# ---------------------------------------------------------------------------
+# mail.{$DOMAIN} {
+# 	reverse_proxy listmonk:9000
+# }
+
+# ---------------------------------------------------------------------------
+# Umami — Analytics
+# ---------------------------------------------------------------------------
+# analytics.{$DOMAIN} {
+# 	reverse_proxy umami:3000
+# }
+
+# ---------------------------------------------------------------------------
+# Beszel — Server monitoring
+# ---------------------------------------------------------------------------
+# beszel.{$DOMAIN} {
+# 	reverse_proxy beszel:8090
+# }
+
+# ---------------------------------------------------------------------------
+# Uptime Kuma — Status page
+# ---------------------------------------------------------------------------
+# status.{$DOMAIN} {
+# 	reverse_proxy uptime-kuma:3001
+# }
+
+# ---------------------------------------------------------------------------
+# Local development fallback — routes *.localhost to services
+# ---------------------------------------------------------------------------
+surreal.localhost {
+	tls internal
+	reverse_proxy surrealdb:8000
+}
+
+search.localhost {
+	tls internal
+	reverse_proxy meilisearch:7700
+}
+
+signoz.localhost {
+	tls internal
+	reverse_proxy signoz-frontend:3301
+}
+
+langfuse.localhost {
+	tls internal
+	reverse_proxy langfuse:3000
+}
+
+windmill.localhost {
+	tls internal
+	reverse_proxy windmill:8000
+}
+
+mail.localhost {
+	tls internal
+	reverse_proxy listmonk:9000
+}
+
+analytics.localhost {
+	tls internal
+	reverse_proxy umami:3000
+}

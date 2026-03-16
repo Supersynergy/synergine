@@ -1,0 +1,65 @@
+{
+  "name": "@superstack/sdk",
+  "version": "1.0.0",
+  "description": "TypeScript SDK/client library for the SuperStack framework",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./db": {
+      "import": "./dist/db/surreal.js",
+      "types": "./dist/db/surreal.d.ts"
+    },
+    "./cache": {
+      "import": "./dist/cache/dragonfly.js",
+      "types": "./dist/cache/dragonfly.d.ts"
+    },
+    "./queue": {
+      "import": "./dist/queue/nats.js",
+      "types": "./dist/queue/nats.d.ts"
+    },
+    "./search": {
+      "import": "./dist/search/meili.js",
+      "types": "./dist/search/meili.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "types": "./dist/types.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node --test dist/**/*.test.js",
+    "init-db": "node scripts/init-db.js",
+    "clean": "rm -rf dist",
+    "prepublish": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "superstack",
+    "sdk",
+    "surrealdb",
+    "dragonfly",
+    "nats",
+    "meilisearch",
+    "typescript"
+  ],
+  "author": "SuperStack Team",
+  "license": "MIT",
+  "dependencies": {
+    "surrealdb": "^1.0.0",
+    "ioredis": "^5.3.2",
+    "nats": "^2.17.0",
+    "meilisearch": "^0.37.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.6",
+    "bun-types": "^1.0.26"
+  }
+}
