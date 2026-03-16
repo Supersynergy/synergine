@@ -1,0 +1,5 @@
+# SigNoz OTel Collector Manager Config
+# Controls dynamic configuration updates from the query service
+agent:
+  config_check_interval: "5s"
+  collectors_list: []

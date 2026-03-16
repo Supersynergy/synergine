@@ -1,0 +1,33 @@
+{
+  "identities": [
+    {
+      "name": "superstack-admin",
+      "credentials": [
+        {
+          "accessKey": "${SEAWEEDFS_ACCESS_KEY}",
+          "secretKey": "${SEAWEEDFS_SECRET_KEY}"
+        }
+      ],
+      "actions": [
+        "Admin",
+        "Read",
+        "Write",
+        "List",
+        "Tagging"
+      ]
+    },
+    {
+      "name": "superstack-readonly",
+      "credentials": [
+        {
+          "accessKey": "${SEAWEEDFS_READONLY_ACCESS_KEY:-readonly}",
+          "secretKey": "${SEAWEEDFS_READONLY_SECRET_KEY:-readonly-secret}"
+        }
+      ],
+      "actions": [
+        "Read",
+        "List"
+      ]
+    }
+  ]
+}

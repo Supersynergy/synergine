@@ -22,7 +22,7 @@ SuperStack is a production-ready, modular infrastructure framework for building 
 
 ```bash
 # Clone the repository
-cd /Users/master/superstack
+git clone https://github.com/supersynergy/synergine.git && cd synergine
 
 # Start core services (SurrealDB, Dragonfly, NATS)
 ./scripts/start.sh core
@@ -430,7 +430,7 @@ colima start --memory 16 --cpu 8 --disk 200
 docker ps
 
 # Start SuperStack
-cd /Users/master/superstack
+git clone https://github.com/supersynergy/synergine.git && cd synergine
 ./scripts/start.sh dev
 ```
 
@@ -558,7 +558,7 @@ View message flow, queue stats, and server health.
 ### Building the SDK
 
 ```bash
-cd /Users/master/superstack
+git clone https://github.com/supersynergy/synergine.git && cd synergine
 npm install
 npm run build
 
@@ -670,7 +670,7 @@ docker-compose up -d
 curl http://localhost:8000/health
 
 # Test NATS connectivity
-docker run --network superstack-net natsio/nats-box nats-sub -s nats:4222 ">"
+docker run --network superstack natsio/nats-box nats-sub -s nats:4222 ">"
 ```
 
 ### High Memory Usage
@@ -690,14 +690,14 @@ jetstream {
 Verify Docker network:
 
 ```bash
-docker network inspect superstack-net
+docker network inspect superstack
 ```
 
 Recreate if needed:
 
 ```bash
-docker network rm superstack-net
-docker network create superstack-net
+docker network rm superstack
+docker network create superstack
 ```
 
 ## License

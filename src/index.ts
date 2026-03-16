@@ -9,6 +9,12 @@ export { DragonflyCache, createDragonflyCache } from "./cache/dragonfly.js";
 export { NatsClient, createNatsClient } from "./queue/nats.js";
 export { MeilisearchClient, createMeilisearchClient } from "./search/meili.js";
 
+// Convenience aliases (match README examples)
+export { SurrealDBClient as SurrealDB } from "./db/surreal.js";
+export { DragonflyCache as Dragonfly } from "./cache/dragonfly.js";
+export { NatsClient as NATS } from "./queue/nats.js";
+export { MeilisearchClient as Meilisearch } from "./search/meili.js";
+
 // Type exports
 export type {
   // Enums

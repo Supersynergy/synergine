@@ -63,36 +63,43 @@ print_info() {
 }
 
 ##############################################################################
-# Build Service List Based on Profile
+# Build Docker Compose Profile Flags Based on Profile
 ##############################################################################
+
+PROFILE_FLAGS=""
 
 build_service_list() {
     local profile=$1
 
     case "$profile" in
         core)
+            PROFILE_FLAGS=""
             SERVICES_TO_START=("${CORE_SERVICES[@]}")
             ;;
         dev)
+            PROFILE_FLAGS="--profile gateway --profile search"
             SERVICES_TO_START=("${CORE_SERVICES[@]}" "${GATEWAY_SERVICES[@]}" "${SEARCH_SERVICES[@]}")
             ;;
         monitoring)
+            PROFILE_FLAGS="--profile monitoring"
             SERVICES_TO_START=("${CORE_SERVICES[@]}" "${MONITORING_SERVICES[@]}")
             ;;
         full)
+            PROFILE_FLAGS="--profile gateway --profile search --profile monitoring --profile workflows"
             SERVICES_TO_START=("${CORE_SERVICES[@]}" "${GATEWAY_SERVICES[@]}" "${SEARCH_SERVICES[@]}" "${MONITORING_SERVICES[@]}" "${WORKFLOW_SERVICES[@]}")
             ;;
         all)
+            PROFILE_FLAGS="--profile gateway --profile search --profile monitoring --profile workflows --profile storage --profile email"
             SERVICES_TO_START=("${CORE_SERVICES[@]}" "${GATEWAY_SERVICES[@]}" "${SEARCH_SERVICES[@]}" "${MONITORING_SERVICES[@]}" "${WORKFLOW_SERVICES[@]}" "${OPTIONAL_SERVICES[@]}")
             ;;
         *)
             print_error "Unknown profile: $profile"
             echo -e "\nAvailable profiles:"
-            echo "  core       - Foundation services only"
-            echo "  dev        - Development stack (recommended)"
-            echo "  monitoring - With observability services"
-            echo "  full       - Complete stack"
-            echo "  all        - Everything including optional services"
+            echo "  core       - Foundation services only (surrealdb + dragonfly + nats)"
+            echo "  dev        - Development stack: core + gateway + search"
+            echo "  monitoring - Core + SigNoz + Langfuse + Beszel + Uptime Kuma"
+            echo "  full       - Core + gateway + search + monitoring + workflows"
+            echo "  all        - Everything including storage (SeaweedFS, Umami) + email (Listmonk)"
             exit 1
             ;;
     esac
@@ -166,8 +173,11 @@ start_services() {
     # Change to project directory
     cd "$PROJECT_ROOT"
 
-    # Start services using Docker Compose
-    if docker-compose up -d $services_str; then
+    print_info "Using compose profiles: ${PROFILE_FLAGS:-none (core only)}"
+    echo ""
+
+    # Start services using Docker Compose v2 with profiles
+    if docker compose $PROFILE_FLAGS up -d --remove-orphans; then
         print_success "Services started successfully"
     else
         print_error "Failed to start services"

@@ -230,7 +230,7 @@ show_port_mappings() {
     cd "$PROJECT_ROOT"
 
     local containers
-    containers=$(docker-compose ps --all -q 2>/dev/null || echo "")
+    containers=$(docker compose ps --all -q 2>/dev/null || echo "")
 
     if [ -z "$containers" ]; then
         print_warning "No containers found"
@@ -239,11 +239,11 @@ show_port_mappings() {
 
     # Get unique service names from compose file
     local services
-    services=$(docker-compose config --services 2>/dev/null | sort)
+    services=$(docker compose --profile gateway --profile search --profile monitoring --profile workflows --profile storage --profile email config --services 2>/dev/null | sort)
 
     for service in $services; do
         local container_id
-        container_id=$(docker-compose ps -q "$service" 2>/dev/null || echo "")
+        container_id=$(docker compose ps -q "$service" 2>/dev/null || echo "")
 
         if [ -n "$container_id" ]; then
             local state=$(get_container_status "$container_id")
@@ -285,7 +285,7 @@ show_resource_usage() {
     cd "$PROJECT_ROOT"
 
     local containers
-    containers=$(docker-compose ps -q 2>/dev/null || echo "")
+    containers=$(docker compose ps -q 2>/dev/null || echo "")
 
     if [ -z "$containers" ]; then
         print_warning "No containers found"
@@ -309,11 +309,11 @@ show_recent_logs() {
     cd "$PROJECT_ROOT"
 
     local services
-    services=$(docker-compose config --services 2>/dev/null | sort)
+    services=$(docker compose --profile gateway --profile search --profile monitoring --profile workflows --profile storage --profile email config --services 2>/dev/null | sort)
 
     for service in $services; do
         local container_id
-        container_id=$(docker-compose ps -q "$service" 2>/dev/null || echo "")
+        container_id=$(docker compose ps -q "$service" 2>/dev/null || echo "")
 
         if [ -n "$container_id" ]; then
             echo -e "${CYAN}${service}:${NC}"
@@ -358,7 +358,7 @@ show_overall_status() {
     local stopped=0
     local services
 
-    services=$(docker-compose config --services 2>/dev/null | sort)
+    services=$(docker compose --profile gateway --profile search --profile monitoring --profile workflows --profile storage --profile email config --services 2>/dev/null | sort)
 
     echo "Service Status:"
     echo "══════════════════════════════════════════════════════════════════════"
@@ -368,7 +368,7 @@ show_overall_status() {
         ((total++))
 
         local container_id
-        container_id=$(docker-compose ps -q "$service" 2>/dev/null || echo "")
+        container_id=$(docker compose ps -q "$service" 2>/dev/null || echo "")
 
         if [ -n "$container_id" ]; then
             local state=$(get_container_status "$container_id")

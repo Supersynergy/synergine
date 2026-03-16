@@ -1,0 +1,66 @@
+# =============================================================================
+# Listmonk Configuration
+# =============================================================================
+# Most settings here are overridden by LISTMONK_* env vars in docker-compose.
+# This file provides structural defaults.
+# Docs: https://listmonk.app/docs/configuration/
+# =============================================================================
+
+[app]
+address = "0.0.0.0:9000"
+
+# Admin credentials — set via LISTMONK_app__admin_username / admin_password env vars
+admin_username = "admin"
+admin_password = ""
+
+# ---------------------------------------------------------------------------
+# Database — overridden by LISTMONK_db__* env vars
+# ---------------------------------------------------------------------------
+[db]
+host = "listmonk-db"
+port = 5432
+user = "listmonk"
+password = ""
+database = "listmonk"
+ssl_mode = "disable"
+max_open = 25
+max_idle = 25
+max_lifetime = "300s"
+
+# ---------------------------------------------------------------------------
+# Security
+# ---------------------------------------------------------------------------
+[security]
+# Allowed hosts (empty = allow all)
+allowed_hosts = []
+# Enable if behind a reverse proxy
+trust_proxy_headers = true
+
+# ---------------------------------------------------------------------------
+# Upload storage — local (switch to S3 by updating this section)
+# ---------------------------------------------------------------------------
+[upload]
+provider = "filesystem"
+filesystem.upload_path = "/listmonk/uploads"
+filesystem.upload_uri = "/uploads"
+
+# S3 example (uncomment + set env vars to use SeaweedFS S3):
+# provider = "s3"
+# [upload.s3]
+# url = "http://seaweedfs-s3:8333"
+# access_key = ""  # set via env
+# secret_key = ""  # set via env
+# region = "us-east-1"
+# bucket = "listmonk"
+# bucket_path = "/"
+# bucket_domain = ""
+
+# ---------------------------------------------------------------------------
+# Performance
+# ---------------------------------------------------------------------------
+[performance]
+# Max concurrent campaign message dispatches
+max_send_workers = 5
+
+# Batch size per worker
+message_rate = 10

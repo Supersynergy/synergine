@@ -22,7 +22,7 @@
 #       --profile workflows --profile storage --profile email down
 #
 # Prerequisites:
-#   cp .env.example .env  # then edit secrets
+#   cp env.example .env  # then edit secrets
 # =============================================================================
 
 name: superstack
@@ -176,18 +176,21 @@ services:
     image: nats:2.10-alpine
     container_name: superstack-nats
     restart: unless-stopped
+    # Uses config/nats.conf for full configuration (JetStream, auth, limits)
+    # Falls back to CLI flags if config file not present
     command: >
-      -js
-      -sd /data
-      -m 8222
-      -p 4222
-      --max_payload 8MB
-      --max_connections 10000
+      --config /etc/nats/nats.conf
+    environment:
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN:-}
+      NATS_ADMIN_PASSWORD: ${NATS_ADMIN_PASSWORD:-}
+      NATS_APP_PASSWORD: ${NATS_APP_PASSWORD:-}
+      NATS_MONITOR_PASSWORD: ${NATS_MONITOR_PASSWORD:-}
     ports:
       - "${NATS_CLIENT_PORT:-4222}:4222"
       - "${NATS_MONITOR_PORT:-8222}:8222"
     volumes:
       - nats-data:/data
+      - ./config/nats.conf:/etc/nats/nats.conf:ro
     networks:
       - superstack
     healthcheck:
@@ -226,7 +229,7 @@ services:
       - "443:443"
       - "443:443/udp"  # HTTP/3
     volumes:
-      - ./services/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./config/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
     environment:
@@ -1028,7 +1031,7 @@ services:
     image: postgres:16-alpine
     container_name: superstack-umami-db
     restart: unless-stopped
-    profiles: [storage]
+    profiles: [analytics]
     environment:
       POSTGRES_DB: ${UMAMI_DB_NAME:-umami}
       POSTGRES_USER: ${UMAMI_DB_USER:-umami}
@@ -1062,7 +1065,7 @@ services:
     image: ghcr.io/umami-software/umami:postgresql-latest
     container_name: superstack-umami
     restart: unless-stopped
-    profiles: [storage]
+    profiles: [analytics]
     environment:
       DATABASE_URL: "postgresql://${UMAMI_DB_USER:-umami}:${UMAMI_DB_PASSWORD}@umami-db:5432/${UMAMI_DB_NAME:-umami}"
       DATABASE_TYPE: postgresql

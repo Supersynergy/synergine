@@ -136,7 +136,7 @@ check_running_services() {
     cd "$PROJECT_ROOT"
 
     # Get list of running services
-    local running=$(docker-compose ps --services --filter "status=running" 2>/dev/null || true)
+    local running=$(docker compose ps --services --filter "status=running" 2>/dev/null || true)
 
     if [ -z "$running" ]; then
         print_info "No services are currently running"
@@ -157,11 +157,14 @@ stop_services() {
 
     cd "$PROJECT_ROOT"
 
+    # All profiles flag to ensure all profile-gated services are also stopped
+    local ALL_PROFILES="--profile gateway --profile search --profile monitoring --profile workflows --profile storage --profile email"
+
     if [ "$FORCE_STOP" = true ]; then
         print_warning "Force stopping all services..."
         print_info "Sending SIGKILL to all containers"
 
-        if docker-compose kill; then
+        if docker compose $ALL_PROFILES kill; then
             print_success "Force stopped all services"
         else
             print_error "Failed to force stop services"
@@ -171,7 +174,7 @@ stop_services() {
         print_info "Gracefully stopping services..."
         print_info "Sending SIGTERM signal (60 second timeout)"
 
-        if docker-compose down --timeout=60; then
+        if docker compose $ALL_PROFILES down --timeout=60; then
             print_success "Gracefully stopped all services"
         else
             print_error "Failed to stop services gracefully"
@@ -215,7 +218,7 @@ remove_volumes() {
     echo ""
     print_info "Removing volumes..."
 
-    if docker-compose down -v; then
+    if docker compose --profile gateway --profile search --profile monitoring --profile workflows --profile storage --profile email down -v; then
         print_success "Removed all volumes"
     else
         print_error "Failed to remove volumes"
