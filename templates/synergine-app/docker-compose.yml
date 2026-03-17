@@ -1,0 +1,138 @@
+# =============================================================================
+# Synergine App — Infrastructure Layer
+# =============================================================================
+# Runtime: Colima (preferred) or Docker Desktop
+#   colima start --cpu 4 --memory 8 --disk 60
+#
+# Usage:
+#   Core only:     docker compose up -d
+#   + Search:      docker compose --profile search up -d
+#   + Monitoring:  docker compose --profile monitoring up -d
+#   Full:          docker compose --profile search --profile monitoring up -d
+#   Stop:          docker compose --profile search --profile monitoring down
+# =============================================================================
+
+name: synergine
+
+networks:
+  synergine:
+    name: synergine
+    driver: bridge
+
+volumes:
+  surrealdb-data:
+  dragonfly-data:
+  nats-data:
+  meilisearch-data:
+  caddy-data:
+  caddy-config:
+
+services:
+
+  # ===========================================================================
+  # CORE — always starts
+  # ===========================================================================
+
+  # SurrealDB 3.0 — Multi-model DB (graph + vector + doc + FTS)
+  surrealdb:
+    image: surrealdb/surrealdb:v2.3.3
+    container_name: synergine-surrealdb
+    restart: unless-stopped
+    user: root
+    command: >
+      start --log info
+      --user ${SURREALDB_USER:-root}
+      --pass ${SURREALDB_PASS:-synergine}
+      rocksdb:/data/surreal.db
+    ports:
+      - "${SURREALDB_PORT:-8000}:8000"
+    volumes:
+      - surrealdb-data:/data
+    networks: [synergine]
+    healthcheck:
+      test: ["CMD", "/surreal", "is-ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Dragonfly — Redis-compatible cache (25x faster)
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.27.2
+    container_name: synergine-dragonfly
+    restart: unless-stopped
+    command: >
+      --maxmemory=1gb
+      --cache_mode
+      --requirepass=${DRAGONFLY_PASS:-synergine}
+    ulimits:
+      memlock: -1
+    ports:
+      - "127.0.0.1:6390:6379"
+    volumes:
+      - dragonfly-data:/data
+    networks: [synergine]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${DRAGONFLY_PASS:-synergine}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NATS — Cloud-native messaging with JetStream
+  nats:
+    image: nats:2.10-alpine
+    container_name: synergine-nats
+    restart: unless-stopped
+    command: --jetstream --store_dir=/data
+    ports:
+      - "${NATS_PORT:-4222}:4222"
+      - "${NATS_MONITOR_PORT:-8222}:8222"
+    volumes:
+      - nats-data:/data
+    networks: [synergine]
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================================================
+  # SEARCH (profile: search)
+  # ===========================================================================
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: synergine-meilisearch
+    restart: unless-stopped
+    profiles: [search]
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-synergine-meili-key}
+      MEILI_ENV: development
+    ports:
+      - "${MEILI_PORT:-7700}:7700"
+    volumes:
+      - meilisearch-data:/meili_data
+    networks: [synergine]
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7700/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================================================
+  # GATEWAY (profile: gateway)
+  # ===========================================================================
+
+  caddy:
+    image: caddy:2.9-alpine
+    container_name: synergine-caddy
+    restart: unless-stopped
+    profiles: [gateway]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks: [synergine]

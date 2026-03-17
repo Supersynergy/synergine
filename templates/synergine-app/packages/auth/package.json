@@ -1,0 +1,24 @@
+{
+  "name": "@synergine-app/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@synergine-app/db": "workspace:*",
+    "@synergine-app/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@synergine-app/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

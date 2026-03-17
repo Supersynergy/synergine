@@ -1,0 +1,45 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "serve": "vite preview",
+    "start": "vite",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "@libsql/client": "catalog:",
+    "@synergine-app/auth": "workspace:*",
+    "@synergine-app/env": "workspace:*",
+    "@synergine-app/ui": "workspace:*",
+    "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-form": "^1.28.0",
+    "@tanstack/react-router": "^1.141.1",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "libsql": "catalog:",
+    "lucide-react": "catalog:",
+    "next-themes": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "sonner": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@synergine-app/config": "workspace:*",
+    "@tanstack/react-router-devtools": "^1.141.1",
+    "@tanstack/router-plugin": "^1.141.1",
+    "@types/node": "^22.13.14",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^4.3.4",
+    "postcss": "^8.5.3",
+    "tailwindcss": "catalog:",
+    "typescript": "^5",
+    "vite": "^6.2.2"
+  }
+}
