@@ -1,34 +1,3 @@
-<!-- REPO-POLISH:START -->
-<p align="center">
-  <img src="docs/assets/social-preview.png" alt="Repo social preview" width="100%">
-</p>
-
-> Synergine is a TypeScript app/toolkit for practical developer workflows.
-
-## Quick Start
-
-```bash
-git clone https://github.com/Supersynergy/synergine.git
-cd synergine
-bun install
-```
-
-Expected result: the project runs locally or reports the next missing prerequisite directly in the terminal.
-
-## Developer Map
-
-| Need | Command |
-|---|---|
-| dev | `bun run dev` |
-| test | `bun run test` |
-| build | `bun run build` |
-| setup | `bun install` |
-
-Full verification path: `bun run dev && bun run test && bun run build && bun install`
-
-Agent instructions live in [AGENTS.md](AGENTS.md).
-<!-- REPO-POLISH:END -->
-
 <p align="center">
   <img src="https://img.shields.io/badge/Synergine-v2.0-blueviolet?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyTDIgNy41djlMMTIgMjJsNi0zLjI3VjEyaC0ydjVuMzdMOCAxOSA0IDExLjQ3VjguNTNMMTIgNCIvPjwvc3ZnPg==" alt="Synergine v2.0">
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License">
