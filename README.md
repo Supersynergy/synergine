@@ -1,4 +1,4 @@
-![An interconnected engine of software components](docs/assets/cover.png)
+![Synergine](docs/assets/cover.png)
 
 <p align="center">
   <img src="https://img.shields.io/badge/Synergine-v2.0-blueviolet?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyTDIgNy41djlMMTIgMjJsNi0zLjI3VjEyaC0ydjVuMzdMOCAxOSA0IDExLjQ3VjguNTNMMTIgNCIvPjwvc3ZnPg==" alt="Synergine v2.0">
