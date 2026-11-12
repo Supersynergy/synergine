@@ -115,19 +115,55 @@ bun install && bun run db:push && bun run dev
 
 ### Why These Choices?
 
-| Component | Choice | Why Not the Alternative |
-|-----------|--------|----------------------|
-| **Database** | SurrealDB | Graph + Vector + Doc + FTS in ONE db. No Postgres+Redis+Elastic combo needed |
-| **Cache** | Dragonfly | 25x faster than Redis, drop-in compatible, single-threaded simplicity |
-| **Messaging** | NATS | 10x lighter than Kafka, JetStream for persistence, perfect for agents |
-| **Search** | Meilisearch | Typo-tolerant, instant, open-source Algolia replacement |
-| **API** | Hono | 402K ops/sec, runs everywhere (Bun/Node/CF Workers/Deno), 14KB |
-| **Auth** | Better Auth | Free, self-hosted, TypeScript-native, Passkeys ready |
-| **ORM** | Drizzle | Edge-compatible, type-safe, lighter than Prisma |
-| **Runtime** | Bun | 89K req/sec, 8ms cold start, native TypeScript |
-| **CSS** | Tailwind v4 | Oxide engine (Rust), Lightning CSS, zero-runtime |
-| **Components** | shadcn/ui | Copy-paste, Radix primitives, fully customizable |
-| **Container** | Colima | Free, lightweight, no Docker Desktop license needed |
+<details>
+<summary><strong>📋 Show 11 entries</strong></summary>
+
+- **Database**<br>
+  Choice: SurrealDB<br>
+  Why Not the Alternative: Graph + Vector + Doc + FTS in ONE db. No Postgres+Redis+Elastic combo needed
+
+- **Cache**<br>
+  Choice: Dragonfly<br>
+  Why Not the Alternative: 25x faster than Redis, drop-in compatible, single-threaded simplicity
+
+- **Messaging**<br>
+  Choice: NATS<br>
+  Why Not the Alternative: 10x lighter than Kafka, JetStream for persistence, perfect for agents
+
+- **Search**<br>
+  Choice: Meilisearch<br>
+  Why Not the Alternative: Typo-tolerant, instant, open-source Algolia replacement
+
+- **API**<br>
+  Choice: Hono<br>
+  Why Not the Alternative: 402K ops/sec, runs everywhere (Bun/Node/CF Workers/Deno), 14KB
+
+- **Auth**<br>
+  Choice: Better Auth<br>
+  Why Not the Alternative: Free, self-hosted, TypeScript-native, Passkeys ready
+
+- **ORM**<br>
+  Choice: Drizzle<br>
+  Why Not the Alternative: Edge-compatible, type-safe, lighter than Prisma
+
+- **Runtime**<br>
+  Choice: Bun<br>
+  Why Not the Alternative: 89K req/sec, 8ms cold start, native TypeScript
+
+- **CSS**<br>
+  Choice: Tailwind v4<br>
+  Why Not the Alternative: Oxide engine (Rust), Lightning CSS, zero-runtime
+
+- **Components**<br>
+  Choice: shadcn/ui<br>
+  Why Not the Alternative: Copy-paste, Radix primitives, fully customizable
+
+- **Container**<br>
+  Choice: Colima<br>
+  Why Not the Alternative: Free, lightweight, no Docker Desktop license needed
+
+</details>
+
 
 ---
 
@@ -173,158 +209,491 @@ What you can build with Synergine — from hours to days, not months.
 
 ### AI & Agents
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 1 | **AI Customer Support Bot** | Hono API + SurrealDB (memory) + NATS (queue) + Claude API |
-| 2 | **Multi-Agent Orchestrator** | NATS pub/sub + SurrealDB (state) + Dragonfly (cache) |
-| 3 | **RAG Knowledge Base** | SurrealDB vectors + Meilisearch FTS + Ollama embeddings |
-| 4 | **AI Code Review Tool** | Hono webhook + Claude API + GitHub integration |
-| 5 | **Voice Assistant** | whisper-rs + Hono WebSocket + SurrealDB (context) |
-| 6 | **AI Writing Assistant** | React + Hono + Claude API + SurrealDB (drafts) |
-| 7 | **Autonomous Research Agent** | NATS tasks + Crawl4AI + SurrealDB graph (knowledge) |
-| 8 | **AI Image Pipeline** | Candle/ONNX + Dragonfly queue + SurrealDB metadata |
-| 9 | **Chatbot with Memory** | SurrealDB graph relations + vector similarity search |
-| 10 | **AI Email Responder** | Resend + Claude API + SurrealDB (templates) |
+<details>
+<summary><strong>📋 Show 10 entries</strong></summary>
+
+- **AI Customer Support Bot**<br>
+  #: 1<br>
+  Key Stack: Hono API + SurrealDB (memory) + NATS (queue) + Claude API
+
+- **Multi-Agent Orchestrator**<br>
+  #: 2<br>
+  Key Stack: NATS pub/sub + SurrealDB (state) + Dragonfly (cache)
+
+- **RAG Knowledge Base**<br>
+  #: 3<br>
+  Key Stack: SurrealDB vectors + Meilisearch FTS + Ollama embeddings
+
+- **AI Code Review Tool**<br>
+  #: 4<br>
+  Key Stack: Hono webhook + Claude API + GitHub integration
+
+- **Voice Assistant**<br>
+  #: 5<br>
+  Key Stack: whisper-rs + Hono WebSocket + SurrealDB (context)
+
+- **AI Writing Assistant**<br>
+  #: 6<br>
+  Key Stack: React + Hono + Claude API + SurrealDB (drafts)
+
+- **Autonomous Research Agent**<br>
+  #: 7<br>
+  Key Stack: NATS tasks + Crawl4AI + SurrealDB graph (knowledge)
+
+- **AI Image Pipeline**<br>
+  #: 8<br>
+  Key Stack: Candle/ONNX + Dragonfly queue + SurrealDB metadata
+
+- **Chatbot with Memory**<br>
+  #: 9<br>
+  Key Stack: SurrealDB graph relations + vector similarity search
+
+- **AI Email Responder**<br>
+  #: 10<br>
+  Key Stack: Resend + Claude API + SurrealDB (templates)
+
+</details>
+
 
 ### SaaS Products
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 11 | **CRM System** | SurrealDB graph + Hono API + React dashboard + Tremor |
-| 12 | **Project Management** | SurrealDB relations + NATS real-time + shadcn/ui |
-| 13 | **Invoice & Billing** | Stripe + Drizzle + React Email + PDF generation |
-| 14 | **Analytics Dashboard** | Recharts/ECharts + SurrealDB + Dragonfly (caching) |
-| 15 | **Subscription Platform** | Better Auth + Stripe/Polar + Drizzle |
-| 16 | **Multi-Tenant App** | SurrealDB namespaces + Better Auth + Hono middleware |
-| 17 | **Form Builder** | React DnD + SurrealDB (schemas) + Hono (submissions) |
-| 18 | **Booking System** | SurrealDB (availability graph) + Stripe + React Email |
-| 19 | **Feedback Collection** | Hono API + SurrealDB + PostHog analytics |
-| 20 | **White-Label Platform** | Tailwind theming + SurrealDB per-tenant + Caddy routing |
+<details>
+<summary><strong>📋 Show 10 entries</strong></summary>
+
+- **CRM System**<br>
+  #: 11<br>
+  Key Stack: SurrealDB graph + Hono API + React dashboard + Tremor
+
+- **Project Management**<br>
+  #: 12<br>
+  Key Stack: SurrealDB relations + NATS real-time + shadcn/ui
+
+- **Invoice & Billing**<br>
+  #: 13<br>
+  Key Stack: Stripe + Drizzle + React Email + PDF generation
+
+- **Analytics Dashboard**<br>
+  #: 14<br>
+  Key Stack: Recharts/ECharts + SurrealDB + Dragonfly (caching)
+
+- **Subscription Platform**<br>
+  #: 15<br>
+  Key Stack: Better Auth + Stripe/Polar + Drizzle
+
+- **Multi-Tenant App**<br>
+  #: 16<br>
+  Key Stack: SurrealDB namespaces + Better Auth + Hono middleware
+
+- **Form Builder**<br>
+  #: 17<br>
+  Key Stack: React DnD + SurrealDB (schemas) + Hono (submissions)
+
+- **Booking System**<br>
+  #: 18<br>
+  Key Stack: SurrealDB (availability graph) + Stripe + React Email
+
+- **Feedback Collection**<br>
+  #: 19<br>
+  Key Stack: Hono API + SurrealDB + PostHog analytics
+
+- **White-Label Platform**<br>
+  #: 20<br>
+  Key Stack: Tailwind theming + SurrealDB per-tenant + Caddy routing
+
+</details>
+
 
 ### E-Commerce
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 21 | **Online Store** | MedusaJS v2 + Stripe + Meilisearch (product search) |
-| 22 | **Digital Product Shop** | Polar.sh + Hono + SurrealDB (licenses) |
-| 23 | **Marketplace** | SurrealDB graph (sellers→products→buyers) + Stripe Connect |
-| 24 | **AI Product Recommendations** | SurrealDB vectors + collaborative filtering |
-| 25 | **Inventory Management** | SurrealDB + NATS events + Recharts dashboard |
-| 26 | **Price Comparison Engine** | Spider scraping + SurrealDB + Meilisearch |
-| 27 | **Subscription Box** | Stripe recurring + SurrealDB (curation) + React Email |
-| 28 | **Auction Platform** | NATS real-time bids + SurrealDB + Dragonfly (leaderboard) |
-| 29 | **Affiliate Dashboard** | SurrealDB graph (referrals) + Recharts + Hono API |
-| 30 | **Gift Card System** | SurrealDB + Dragonfly (redemption cache) + Stripe |
+<details>
+<summary><strong>📋 Show 10 entries</strong></summary>
+
+- **Online Store**<br>
+  #: 21<br>
+  Key Stack: MedusaJS v2 + Stripe + Meilisearch (product search)
+
+- **Digital Product Shop**<br>
+  #: 22<br>
+  Key Stack: Polar.sh + Hono + SurrealDB (licenses)
+
+- **Marketplace**<br>
+  #: 23<br>
+  Key Stack: SurrealDB graph (sellers→products→buyers) + Stripe Connect
+
+- **AI Product Recommendations**<br>
+  #: 24<br>
+  Key Stack: SurrealDB vectors + collaborative filtering
+
+- **Inventory Management**<br>
+  #: 25<br>
+  Key Stack: SurrealDB + NATS events + Recharts dashboard
+
+- **Price Comparison Engine**<br>
+  #: 26<br>
+  Key Stack: Spider scraping + SurrealDB + Meilisearch
+
+- **Subscription Box**<br>
+  #: 27<br>
+  Key Stack: Stripe recurring + SurrealDB (curation) + React Email
+
+- **Auction Platform**<br>
+  #: 28<br>
+  Key Stack: NATS real-time bids + SurrealDB + Dragonfly (leaderboard)
+
+- **Affiliate Dashboard**<br>
+  #: 29<br>
+  Key Stack: SurrealDB graph (referrals) + Recharts + Hono API
+
+- **Gift Card System**<br>
+  #: 30<br>
+  Key Stack: SurrealDB + Dragonfly (redemption cache) + Stripe
+
+</details>
+
 
 ### Data & Analytics
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 31 | **Business Intelligence Dashboard** | Tremor + ECharts + SurrealDB analytics |
-| 32 | **Real-Time Metrics** | NATS streaming + Dragonfly + Recharts live |
-| 33 | **Log Analysis Platform** | Vector.dev + SurrealDB + Meilisearch |
-| 34 | **Survey & Polling** | Hono + SurrealDB + Nivo charts |
-| 35 | **A/B Testing Platform** | PostHog + Dragonfly (feature flags) + Recharts |
-| 36 | **SEO Rank Tracker** | Spider crawler + SurrealDB time-series + Recharts |
-| 37 | **Social Media Analytics** | Crawl4AI + SurrealDB + Tremor dashboard |
-| 38 | **Financial Dashboard** | ECharts (candlestick) + SurrealDB + Dragonfly |
-| 39 | **Geospatial Analytics** | Deck.gl + MapLibre + SurrealDB |
-| 40 | **Data Pipeline Monitor** | NATS + Vector.dev + Tremor |
+<details>
+<summary><strong>📋 Show 10 entries</strong></summary>
+
+- **Business Intelligence Dashboard**<br>
+  #: 31<br>
+  Key Stack: Tremor + ECharts + SurrealDB analytics
+
+- **Real-Time Metrics**<br>
+  #: 32<br>
+  Key Stack: NATS streaming + Dragonfly + Recharts live
+
+- **Log Analysis Platform**<br>
+  #: 33<br>
+  Key Stack: Vector.dev + SurrealDB + Meilisearch
+
+- **Survey & Polling**<br>
+  #: 34<br>
+  Key Stack: Hono + SurrealDB + Nivo charts
+
+- **A/B Testing Platform**<br>
+  #: 35<br>
+  Key Stack: PostHog + Dragonfly (feature flags) + Recharts
+
+- **SEO Rank Tracker**<br>
+  #: 36<br>
+  Key Stack: Spider crawler + SurrealDB time-series + Recharts
+
+- **Social Media Analytics**<br>
+  #: 37<br>
+  Key Stack: Crawl4AI + SurrealDB + Tremor dashboard
+
+- **Financial Dashboard**<br>
+  #: 38<br>
+  Key Stack: ECharts (candlestick) + SurrealDB + Dragonfly
+
+- **Geospatial Analytics**<br>
+  #: 39<br>
+  Key Stack: Deck.gl + MapLibre + SurrealDB
+
+- **Data Pipeline Monitor**<br>
+  #: 40<br>
+  Key Stack: NATS + Vector.dev + Tremor
+
+</details>
+
 
 ### Automation & Scraping
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 41 | **Lead Generation Engine** | Spider/Crawl4AI + SurrealDB + Meilisearch |
-| 42 | **Price Monitoring** | Patchright + Dragonfly (diffs) + NATS alerts |
-| 43 | **Content Aggregator** | Spider + SurrealDB + Meilisearch (search) |
-| 44 | **Job Board Scraper** | Crawl4AI + SurrealDB + React Email (alerts) |
-| 45 | **Review Monitoring** | Spider + Claude sentiment + SurrealDB |
-| 46 | **Competitor Tracker** | Spider + SurrealDB graph + Tremor dashboard |
-| 47 | **Social Listening** | Crawl4AI + NATS streaming + SurrealDB |
-| 48 | **Email Finder** | Spider + Dragonfly cache + SurrealDB (contacts) |
-| 49 | **Maps Lead Scraper** | GoSom + SurrealDB + React dashboard |
-| 50 | **Automated Outreach** | SurrealDB pipeline + Resend + NATS scheduling |
+<details>
+<summary><strong>📋 Show 10 entries</strong></summary>
+
+- **Lead Generation Engine**<br>
+  #: 41<br>
+  Key Stack: Spider/Crawl4AI + SurrealDB + Meilisearch
+
+- **Price Monitoring**<br>
+  #: 42<br>
+  Key Stack: Patchright + Dragonfly (diffs) + NATS alerts
+
+- **Content Aggregator**<br>
+  #: 43<br>
+  Key Stack: Spider + SurrealDB + Meilisearch (search)
+
+- **Job Board Scraper**<br>
+  #: 44<br>
+  Key Stack: Crawl4AI + SurrealDB + React Email (alerts)
+
+- **Review Monitoring**<br>
+  #: 45<br>
+  Key Stack: Spider + Claude sentiment + SurrealDB
+
+- **Competitor Tracker**<br>
+  #: 46<br>
+  Key Stack: Spider + SurrealDB graph + Tremor dashboard
+
+- **Social Listening**<br>
+  #: 47<br>
+  Key Stack: Crawl4AI + NATS streaming + SurrealDB
+
+- **Email Finder**<br>
+  #: 48<br>
+  Key Stack: Spider + Dragonfly cache + SurrealDB (contacts)
+
+- **Maps Lead Scraper**<br>
+  #: 49<br>
+  Key Stack: GoSom + SurrealDB + React dashboard
+
+- **Automated Outreach**<br>
+  #: 50<br>
+  Key Stack: SurrealDB pipeline + Resend + NATS scheduling
+
+</details>
+
 
 ### Developer Tools
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 51 | **API Gateway** | Hono + Caddy + Dragonfly (rate limiting) |
-| 52 | **Feature Flag System** | Dragonfly + Hono middleware + React SDK |
-| 53 | **Webhook Manager** | Hono + NATS + SurrealDB (logs) + Dragonfly (retry) |
-| 54 | **Status Page** | Hono health checks + SurrealDB + React |
-| 55 | **Documentation Site** | Astro + Meilisearch (doc search) |
-| 56 | **CLI Tool Builder** | Ratatui (Rust TUI) + Hono API backend |
-| 57 | **Database Admin Panel** | React + SurrealDB direct + Drizzle Studio |
-| 58 | **Deployment Dashboard** | Docker API + NATS events + Tremor |
-| 59 | **Log Viewer** | SurrealDB + Meilisearch FTS + React virtual scroll |
-| 60 | **Error Tracking** | Hono middleware + SurrealDB + Sentry integration |
+<details>
+<summary><strong>📋 Show 10 entries</strong></summary>
+
+- **API Gateway**<br>
+  #: 51<br>
+  Key Stack: Hono + Caddy + Dragonfly (rate limiting)
+
+- **Feature Flag System**<br>
+  #: 52<br>
+  Key Stack: Dragonfly + Hono middleware + React SDK
+
+- **Webhook Manager**<br>
+  #: 53<br>
+  Key Stack: Hono + NATS + SurrealDB (logs) + Dragonfly (retry)
+
+- **Status Page**<br>
+  #: 54<br>
+  Key Stack: Hono health checks + SurrealDB + React
+
+- **Documentation Site**<br>
+  #: 55<br>
+  Key Stack: Astro + Meilisearch (doc search)
+
+- **CLI Tool Builder**<br>
+  #: 56<br>
+  Key Stack: Ratatui (Rust TUI) + Hono API backend
+
+- **Database Admin Panel**<br>
+  #: 57<br>
+  Key Stack: React + SurrealDB direct + Drizzle Studio
+
+- **Deployment Dashboard**<br>
+  #: 58<br>
+  Key Stack: Docker API + NATS events + Tremor
+
+- **Log Viewer**<br>
+  #: 59<br>
+  Key Stack: SurrealDB + Meilisearch FTS + React virtual scroll
+
+- **Error Tracking**<br>
+  #: 60<br>
+  Key Stack: Hono middleware + SurrealDB + Sentry integration
+
+</details>
+
 
 ### Content & Media
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 61 | **Blog / CMS** | Astro + SurrealDB + Meilisearch + Caddy |
-| 62 | **Newsletter Platform** | React Email + Resend + SurrealDB (subscribers) |
-| 63 | **Podcast Platform** | Hono (uploads) + SurrealDB + React audio player |
-| 64 | **Video Course Platform** | Hono + SurrealDB + Stripe + Better Auth |
-| 65 | **Image Gallery** | Hono upload + Dragonfly (thumbnails) + React lightbox |
-| 66 | **Portfolio Generator** | Astro + GSAP animations + Three.js hero |
-| 67 | **Social Media Scheduler** | SurrealDB (queue) + NATS (timing) + React calendar |
-| 68 | **Wiki / Knowledge Base** | SurrealDB graph (links) + Meilisearch + React |
-| 69 | **Event Platform** | SurrealDB + Stripe + React Email + QR codes |
-| 70 | **Recipe / Cookbook App** | SurrealDB + Meilisearch + React + Zustand |
+<details>
+<summary><strong>📋 Show 10 entries</strong></summary>
+
+- **Blog / CMS**<br>
+  #: 61<br>
+  Key Stack: Astro + SurrealDB + Meilisearch + Caddy
+
+- **Newsletter Platform**<br>
+  #: 62<br>
+  Key Stack: React Email + Resend + SurrealDB (subscribers)
+
+- **Podcast Platform**<br>
+  #: 63<br>
+  Key Stack: Hono (uploads) + SurrealDB + React audio player
+
+- **Video Course Platform**<br>
+  #: 64<br>
+  Key Stack: Hono + SurrealDB + Stripe + Better Auth
+
+- **Image Gallery**<br>
+  #: 65<br>
+  Key Stack: Hono upload + Dragonfly (thumbnails) + React lightbox
+
+- **Portfolio Generator**<br>
+  #: 66<br>
+  Key Stack: Astro + GSAP animations + Three.js hero
+
+- **Social Media Scheduler**<br>
+  #: 67<br>
+  Key Stack: SurrealDB (queue) + NATS (timing) + React calendar
+
+- **Wiki / Knowledge Base**<br>
+  #: 68<br>
+  Key Stack: SurrealDB graph (links) + Meilisearch + React
+
+- **Event Platform**<br>
+  #: 69<br>
+  Key Stack: SurrealDB + Stripe + React Email + QR codes
+
+- **Recipe / Cookbook App**<br>
+  #: 70<br>
+  Key Stack: SurrealDB + Meilisearch + React + Zustand
+
+</details>
+
 
 ### Communication
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 71 | **Real-Time Chat** | NATS WebSocket + SurrealDB (history) + React |
-| 72 | **Notification Center** | NATS pub/sub + Dragonfly + Sonner (toasts) |
-| 73 | **Team Collaboration** | SurrealDB graph + NATS real-time + React |
-| 74 | **Customer Support Desk** | SurrealDB (tickets) + NATS (assignment) + React |
-| 75 | **Internal Messaging** | NATS + SurrealDB + Better Auth (teams) |
-| 76 | **Email Campaign Manager** | React Email + Resend + SurrealDB (analytics) |
-| 77 | **SMS Gateway** | Hono + Twilio + SurrealDB (logs) + NATS |
-| 78 | **Push Notification Service** | NATS + Dragonfly (tokens) + Hono |
-| 79 | **Video Call Integration** | WebRTC + NATS signaling + SurrealDB (rooms) |
-| 80 | **Comment System** | SurrealDB graph (threads) + React + Hono |
+<details>
+<summary><strong>📋 Show 10 entries</strong></summary>
+
+- **Real-Time Chat**<br>
+  #: 71<br>
+  Key Stack: NATS WebSocket + SurrealDB (history) + React
+
+- **Notification Center**<br>
+  #: 72<br>
+  Key Stack: NATS pub/sub + Dragonfly + Sonner (toasts)
+
+- **Team Collaboration**<br>
+  #: 73<br>
+  Key Stack: SurrealDB graph + NATS real-time + React
+
+- **Customer Support Desk**<br>
+  #: 74<br>
+  Key Stack: SurrealDB (tickets) + NATS (assignment) + React
+
+- **Internal Messaging**<br>
+  #: 75<br>
+  Key Stack: NATS + SurrealDB + Better Auth (teams)
+
+- **Email Campaign Manager**<br>
+  #: 76<br>
+  Key Stack: React Email + Resend + SurrealDB (analytics)
+
+- **SMS Gateway**<br>
+  #: 77<br>
+  Key Stack: Hono + Twilio + SurrealDB (logs) + NATS
+
+- **Push Notification Service**<br>
+  #: 78<br>
+  Key Stack: NATS + Dragonfly (tokens) + Hono
+
+- **Video Call Integration**<br>
+  #: 79<br>
+  Key Stack: WebRTC + NATS signaling + SurrealDB (rooms)
+
+- **Comment System**<br>
+  #: 80<br>
+  Key Stack: SurrealDB graph (threads) + React + Hono
+
+</details>
+
 
 ### Desktop & Mobile
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 81 | **Desktop AI Assistant** | Tauri 2 + Ollama + SurrealDB embedded |
-| 82 | **Local-First Note App** | Tauri 2 + SurrealDB + Markdown editor |
-| 83 | **Desktop Dashboard** | Tauri 2 + React + Tremor + system tray |
-| 84 | **File Manager** | Tauri 2 + Rust fs + React file browser |
-| 85 | **Offline-First Mobile App** | React Native + SurrealDB + sync protocol |
-| 86 | **CLI Productivity Tool** | Ratatui + Hono API + SurrealDB |
-| 87 | **System Monitor** | Tauri 2 + bottom (btm) + React charts |
-| 88 | **Password Manager** | Tauri 2 + age encryption + SurrealDB |
-| 89 | **Screenshot Tool** | Tauri 2 + Rust image processing + cloud sync |
-| 90 | **Time Tracker** | Tauri 2 + SurrealDB + Recharts reports |
+<details>
+<summary><strong>📋 Show 10 entries</strong></summary>
+
+- **Desktop AI Assistant**<br>
+  #: 81<br>
+  Key Stack: Tauri 2 + Ollama + SurrealDB embedded
+
+- **Local-First Note App**<br>
+  #: 82<br>
+  Key Stack: Tauri 2 + SurrealDB + Markdown editor
+
+- **Desktop Dashboard**<br>
+  #: 83<br>
+  Key Stack: Tauri 2 + React + Tremor + system tray
+
+- **File Manager**<br>
+  #: 84<br>
+  Key Stack: Tauri 2 + Rust fs + React file browser
+
+- **Offline-First Mobile App**<br>
+  #: 85<br>
+  Key Stack: React Native + SurrealDB + sync protocol
+
+- **CLI Productivity Tool**<br>
+  #: 86<br>
+  Key Stack: Ratatui + Hono API + SurrealDB
+
+- **System Monitor**<br>
+  #: 87<br>
+  Key Stack: Tauri 2 + bottom (btm) + React charts
+
+- **Password Manager**<br>
+  #: 88<br>
+  Key Stack: Tauri 2 + age encryption + SurrealDB
+
+- **Screenshot Tool**<br>
+  #: 89<br>
+  Key Stack: Tauri 2 + Rust image processing + cloud sync
+
+- **Time Tracker**<br>
+  #: 90<br>
+  Key Stack: Tauri 2 + SurrealDB + Recharts reports
+
+</details>
+
 
 ### Security & Infrastructure
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 91 | **Vulnerability Scanner** | Axum + Spider crawler + SurrealDB (findings) |
-| 92 | **Secret Manager** | Rustls + age encryption + Hono API |
-| 93 | **Access Control System** | Better Auth + SurrealDB (permissions graph) |
-| 94 | **Audit Log System** | NATS events + SurrealDB (immutable log) |
-| 95 | **Firewall Dashboard** | Hono + SurrealDB + Recharts + real-time NATS |
+<details>
+<summary><strong>📋 Show 5 entries</strong></summary>
+
+- **Vulnerability Scanner**<br>
+  #: 91<br>
+  Key Stack: Axum + Spider crawler + SurrealDB (findings)
+
+- **Secret Manager**<br>
+  #: 92<br>
+  Key Stack: Rustls + age encryption + Hono API
+
+- **Access Control System**<br>
+  #: 93<br>
+  Key Stack: Better Auth + SurrealDB (permissions graph)
+
+- **Audit Log System**<br>
+  #: 94<br>
+  Key Stack: NATS events + SurrealDB (immutable log)
+
+- **Firewall Dashboard**<br>
+  #: 95<br>
+  Key Stack: Hono + SurrealDB + Recharts + real-time NATS
+
+</details>
+
 
 ### 3D & Creative
 
-| # | Use Case | Key Stack |
-|---|----------|-----------|
-| 96 | **3D Product Configurator** | Three.js + R3F + React + Hono API |
-| 97 | **Interactive Data Globe** | Three.js + Deck.gl + SurrealDB |
-| 98 | **Animated Landing Page** | GSAP ScrollTrigger + Magic UI + Motion + Astro |
-| 99 | **Architecture Viewer** | Three.js + Spline models + React controls |
-| 100 | **Generative Art Platform** | p5.js + Three.js + SurrealDB (gallery) + Stripe |
+<details>
+<summary><strong>📋 Show 5 entries</strong></summary>
+
+- **3D Product Configurator**<br>
+  #: 96<br>
+  Key Stack: Three.js + R3F + React + Hono API
+
+- **Interactive Data Globe**<br>
+  #: 97<br>
+  Key Stack: Three.js + Deck.gl + SurrealDB
+
+- **Animated Landing Page**<br>
+  #: 98<br>
+  Key Stack: GSAP ScrollTrigger + Magic UI + Motion + Astro
+
+- **Architecture Viewer**<br>
+  #: 99<br>
+  Key Stack: Three.js + Spline models + React controls
+
+- **Generative Art Platform**<br>
+  #: 100<br>
+  Key Stack: p5.js + Three.js + SurrealDB (gallery) + Stripe
+
+</details>
+
 
 ---
 
@@ -334,21 +703,63 @@ Synergine includes a **curated knowledge base of 171 tools** across 35+ categori
 
 ### Categories
 
-| Category | Count | Examples |
-|----------|-------|---------|
-| **Web Frameworks** | 11 | Hono, Axum, Astro, Next.js, Loco.rs |
-| **UI Components** | 10 | shadcn/ui, Magic UI, Radix, HeroUI, Mantine |
-| **Animation** | 6 | Motion, GSAP 3 (all free!), Rive, Lottie |
-| **3D / WebGL** | 3 | Three.js + R3F, Spline, Pixi.js |
-| **Data Viz** | 7 | Tremor, Recharts, Nivo, ECharts, Deck.gl |
-| **AI / ML** | 7 | Rig, Candle, Burn, Claude Agent SDK |
-| **Databases** | 8 | SurrealDB, PostgreSQL, Turso, DuckDB |
-| **Scraping** | 9 | Spider, Crawl4AI, Firecrawl, GoSom |
-| **CLI Tools** | 11 | ripgrep, fd, bat, just, zoxide, Ratatui |
-| **DevOps** | 2 | Firecracker, gitoxide |
-| **Security** | 1 | Rustls |
-| **Testing** | 5 | Vitest, Playwright, cargo-nextest |
-| **...and 20+ more** | — | See `docs/superrag/` for full catalog |
+<details>
+<summary><strong>📋 Show 13 entries</strong></summary>
+
+- **Web Frameworks**<br>
+  Count: 11<br>
+  Examples: Hono, Axum, Astro, Next.js, Loco.rs
+
+- **UI Components**<br>
+  Count: 10<br>
+  Examples: shadcn/ui, Magic UI, Radix, HeroUI, Mantine
+
+- **Animation**<br>
+  Count: 6<br>
+  Examples: Motion, GSAP 3 (all free!), Rive, Lottie
+
+- **3D / WebGL**<br>
+  Count: 3<br>
+  Examples: Three.js + R3F, Spline, Pixi.js
+
+- **Data Viz**<br>
+  Count: 7<br>
+  Examples: Tremor, Recharts, Nivo, ECharts, Deck.gl
+
+- **AI / ML**<br>
+  Count: 7<br>
+  Examples: Rig, Candle, Burn, Claude Agent SDK
+
+- **Databases**<br>
+  Count: 8<br>
+  Examples: SurrealDB, PostgreSQL, Turso, DuckDB
+
+- **Scraping**<br>
+  Count: 9<br>
+  Examples: Spider, Crawl4AI, Firecrawl, GoSom
+
+- **CLI Tools**<br>
+  Count: 11<br>
+  Examples: ripgrep, fd, bat, just, zoxide, Ratatui
+
+- **DevOps**<br>
+  Count: 2<br>
+  Examples: Firecracker, gitoxide
+
+- **Security**<br>
+  Count: 1<br>
+  Examples: Rustls
+
+- **Testing**<br>
+  Count: 5<br>
+  Examples: Vitest, Playwright, cargo-nextest
+
+- **...and 20+ more**<br>
+  Count: —<br>
+  Examples: See `docs/superrag/` for full catalog
+
+</details>
+
 
 ### Semantic Search
 
@@ -387,16 +798,43 @@ For performance-critical components, Synergine includes a curated Rust layer.
 
 ### Core Picks
 
-| Tool | Purpose | Why |
-|------|---------|-----|
-| **Axum** | Web APIs | Tokio ecosystem, 17-18K req/sec |
-| **Rig** | AI Agents | 24% CPU vs Python's 64%, modular |
-| **Candle** | ML Inference | CPU/CUDA/Metal/WASM, HuggingFace |
-| **Tauri 2** | Desktop Apps | 10-20MB (vs 100MB Electron) |
-| **Spider** | Web Crawling | 200-1000x faster, 100K+ pages/min |
-| **SeaORM** | Database ORM | Async, 250K+ weekly downloads |
-| **Rustls** | TLS | Faster than OpenSSL, memory-safe |
-| **gitoxide** | Git Operations | Pure Rust, no libgit2 dependency |
+<details>
+<summary><strong>📋 Show 8 entries</strong></summary>
+
+- **Axum**<br>
+  Purpose: Web APIs<br>
+  Why: Tokio ecosystem, 17-18K req/sec
+
+- **Rig**<br>
+  Purpose: AI Agents<br>
+  Why: 24% CPU vs Python's 64%, modular
+
+- **Candle**<br>
+  Purpose: ML Inference<br>
+  Why: CPU/CUDA/Metal/WASM, HuggingFace
+
+- **Tauri 2**<br>
+  Purpose: Desktop Apps<br>
+  Why: 10-20MB (vs 100MB Electron)
+
+- **Spider**<br>
+  Purpose: Web Crawling<br>
+  Why: 200-1000x faster, 100K+ pages/min
+
+- **SeaORM**<br>
+  Purpose: Database ORM<br>
+  Why: Async, 250K+ weekly downloads
+
+- **Rustls**<br>
+  Purpose: TLS<br>
+  Why: Faster than OpenSSL, memory-safe
+
+- **gitoxide**<br>
+  Purpose: Git Operations<br>
+  Why: Pure Rust, no libgit2 dependency
+
+</details>
+
 
 ### Hybrid Architecture
 
@@ -420,30 +858,68 @@ Full catalog: [`docs/superrag/RUST_SUPERSTACK.md`](docs/superrag/RUST_SUPERSTACK
 
 ### Animation (all free in 2026!)
 
-| Library | Size | Best For |
-|---------|------|----------|
-| **Motion** | 17 KB | React animations, layout, gestures |
-| **GSAP 3** | 18 KB | Complex timelines — **ALL plugins now free** |
-| **View Transitions API** | 0 KB | Page transitions (native browser) |
-| **AutoAnimate** | 1.9 KB | Zero-config list animations |
-| **Rive** | 200 KB | Interactive state-machine animations |
+<details>
+<summary><strong>📋 Show 5 entries</strong></summary>
+
+- **Motion**<br>
+  Size: 17 KB<br>
+  Best For: React animations, layout, gestures
+
+- **GSAP 3**<br>
+  Size: 18 KB<br>
+  Best For: Complex timelines — **ALL plugins now free**
+
+- **View Transitions API**<br>
+  Size: 0 KB<br>
+  Best For: Page transitions (native browser)
+
+- **AutoAnimate**<br>
+  Size: 1.9 KB<br>
+  Best For: Zero-config list animations
+
+- **Rive**<br>
+  Size: 200 KB<br>
+  Best For: Interactive state-machine animations
+
+</details>
+
 
 ### Data Visualization
 
-| Tool | Best For |
-|------|----------|
-| **Tremor** | Dashboard KPIs (Vercel-backed) |
-| **Recharts** | Simple React charts |
-| **Apache ECharts** | Millions of data points (GPU) |
-| **Deck.gl** | Geospatial maps (100K+ points) |
-| **Visx** | Custom visualizations (Airbnb) |
+<details>
+<summary><strong>📋 Show 5 entries</strong></summary>
+
+- **Tremor**<br>
+  Best For: Dashboard KPIs (Vercel-backed)
+
+- **Recharts**<br>
+  Best For: Simple React charts
+
+- **Apache ECharts**<br>
+  Best For: Millions of data points (GPU)
+
+- **Deck.gl**<br>
+  Best For: Geospatial maps (100K+ points)
+
+- **Visx**<br>
+  Best For: Custom visualizations (Airbnb)
+
+</details>
+
 
 ### 3D
 
-| Tool | Best For |
-|------|----------|
-| **Three.js + R3F** | 3D web (WebGPU ready, 2.7M DL/wk) |
-| **Spline** | No-code 3D design with AI |
+<details>
+<summary><strong>📋 Show 2 entries</strong></summary>
+
+- **Three.js + R3F**<br>
+  Best For: 3D web (WebGPU ready, 2.7M DL/wk)
+
+- **Spline**<br>
+  Best For: No-code 3D design with AI
+
+</details>
+
 
 Full catalog: [`docs/superrag/UI_STACK.md`](docs/superrag/UI_STACK.md)
 
@@ -451,17 +927,56 @@ Full catalog: [`docs/superrag/UI_STACK.md`](docs/superrag/UI_STACK.md)
 
 ## Infrastructure Services
 
-| Service | Port | Purpose | Profile |
-|---------|------|---------|---------|
-| **SurrealDB** | 8000 | Multi-model DB (graph+vector+doc+FTS) | core |
-| **Dragonfly** | 6379 | Redis-compatible cache (25x faster) | core |
-| **NATS** | 4222 | Cloud-native messaging + JetStream | core |
-| **Meilisearch** | 7700 | Full-text search (typo-tolerant) | search |
-| **Caddy** | 80/443 | Reverse proxy + auto HTTPS | gateway |
-| **SigNoz** | 3301 | OpenTelemetry traces + metrics | monitoring |
-| **Langfuse** | 3100 | LLM observability + evals | monitoring |
-| **Windmill** | 8100 | Workflow automation | workflows |
-| **Listmonk** | 9000 | Newsletter + email campaigns | email |
+<details>
+<summary><strong>📋 Show 9 entries</strong></summary>
+
+- **SurrealDB**<br>
+  Port: 8000<br>
+  Purpose: Multi-model DB (graph+vector+doc+FTS)<br>
+  Profile: core
+
+- **Dragonfly**<br>
+  Port: 6379<br>
+  Purpose: Redis-compatible cache (25x faster)<br>
+  Profile: core
+
+- **NATS**<br>
+  Port: 4222<br>
+  Purpose: Cloud-native messaging + JetStream<br>
+  Profile: core
+
+- **Meilisearch**<br>
+  Port: 7700<br>
+  Purpose: Full-text search (typo-tolerant)<br>
+  Profile: search
+
+- **Caddy**<br>
+  Port: 80/443<br>
+  Purpose: Reverse proxy + auto HTTPS<br>
+  Profile: gateway
+
+- **SigNoz**<br>
+  Port: 3301<br>
+  Purpose: OpenTelemetry traces + metrics<br>
+  Profile: monitoring
+
+- **Langfuse**<br>
+  Port: 3100<br>
+  Purpose: LLM observability + evals<br>
+  Profile: monitoring
+
+- **Windmill**<br>
+  Port: 8100<br>
+  Purpose: Workflow automation<br>
+  Profile: workflows
+
+- **Listmonk**<br>
+  Port: 9000<br>
+  Purpose: Newsletter + email campaigns<br>
+  Profile: email
+
+</details>
+
 
 ### Profiles
 
@@ -522,15 +1037,32 @@ Full analysis: [`docs/superrag/STACK_FIT.md`](docs/superrag/STACK_FIT.md)
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [`docs/superrag/RUST_SUPERSTACK.md`](docs/superrag/RUST_SUPERSTACK.md) | Rust tool catalog (Axum, Rig, Candle, Tauri, Spider...) |
-| [`docs/superrag/UI_STACK.md`](docs/superrag/UI_STACK.md) | UI Components + Animation + 3D + DataViz |
-| [`docs/superrag/STACK_FIT.md`](docs/superrag/STACK_FIT.md) | What fits your stack and what doesn't |
-| [`docs/superrag/SUPERSTACK.md`](docs/superrag/SUPERSTACK.md) | Master stack reference (8 tiers, 100+ tools) |
-| [`docs/superrag/CASHMAKERS.md`](docs/superrag/CASHMAKERS.md) | 100 monetizable use cases with ZeroClaw |
-| [`docs/superrag/ARCHITECTURE.md`](docs/superrag/ARCHITECTURE.md) | System architecture + knowledge graph design |
-| [`docs/superrag/OBSOLETE.md`](docs/superrag/OBSOLETE.md) | What NOT to use in 2026 |
+<details>
+<summary><strong>📋 Show 7 entries</strong></summary>
+
+- **[`docs/superrag/RUST_SUPERSTACK.md`](docs/superrag/RUST_SUPERSTACK.md)**<br>
+  Description: Rust tool catalog (Axum, Rig, Candle, Tauri, Spider...)
+
+- **[`docs/superrag/UI_STACK.md`](docs/superrag/UI_STACK.md)**<br>
+  Description: UI Components + Animation + 3D + DataViz
+
+- **[`docs/superrag/STACK_FIT.md`](docs/superrag/STACK_FIT.md)**<br>
+  Description: What fits your stack and what doesn't
+
+- **[`docs/superrag/SUPERSTACK.md`](docs/superrag/SUPERSTACK.md)**<br>
+  Description: Master stack reference (8 tiers, 100+ tools)
+
+- **[`docs/superrag/CASHMAKERS.md`](docs/superrag/CASHMAKERS.md)**<br>
+  Description: 100 monetizable use cases with ZeroClaw
+
+- **[`docs/superrag/ARCHITECTURE.md`](docs/superrag/ARCHITECTURE.md)**<br>
+  Description: System architecture + knowledge graph design
+
+- **[`docs/superrag/OBSOLETE.md`](docs/superrag/OBSOLETE.md)**<br>
+  Description: What NOT to use in 2026
+
+</details>
+
 
 ---
 
