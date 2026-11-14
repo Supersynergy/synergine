@@ -34,8 +34,8 @@ Created a comprehensive, production-ready TypeScript SDK for the SuperStack fram
 
 | File | Lines | Purpose |
 |------|-------|---------|
-| `SDK.md` | 710 | Complete API reference & guide |
-| `SDK-ARCHITECTURE.md` | 542 | Architecture & design patterns |
+| `docs/reference/SDK.md` | 710 | Complete API reference & guide |
+| `docs/architecture/SDK-ARCHITECTURE.md` | 542 | Architecture & design patterns |
 
 ### 4. Examples (514 lines)
 
@@ -373,8 +373,8 @@ superstack/
 │   └── agent-example.ts           (290 lines)
 ├── package.json                   (65 lines)
 ├── tsconfig.json                  (39 lines)
-├── SDK.md                         (710 lines)
-├── SDK-ARCHITECTURE.md            (542 lines)
+├── docs/reference/SDK.md                         (710 lines)
+├── docs/architecture/SDK-ARCHITECTURE.md            (542 lines)
 └── .gitignore
 ```
 

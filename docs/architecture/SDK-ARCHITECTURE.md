@@ -512,7 +512,7 @@ superstack/
 │   └── agent-example.ts
 ├── package.json
 ├── tsconfig.json
-└── SDK.md
+└── docs/reference/SDK.md
 ```
 
 ## Total Lines of Code
@@ -537,6 +537,6 @@ superstack/
 
 - **Package Manifest**: `package.json`
 - **TypeScript Config**: `tsconfig.json`
-- **SDK Documentation**: `SDK.md`
+- **SDK Documentation**: `docs/reference/SDK.md`
 - **Usage Examples**: `examples/`
 - **Type Definitions**: `src/types.ts`

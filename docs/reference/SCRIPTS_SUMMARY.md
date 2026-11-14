@@ -57,7 +57,7 @@ Complete automation suite for frictionless SuperStack developer experience:
 
 ### Additional Documentation
 
-- **DEVELOPER_TOOLKIT.md** (450 lines) — Comprehensive guide with examples
+- **docs/reference/DEVELOPER_TOOLKIT.md** (450 lines) — Comprehensive guide with examples
 
 ## Key Features
 
@@ -102,8 +102,8 @@ Complete automation suite for frictionless SuperStack developer experience:
 │   ├── stop.sh            (existing)
 │   └── status.sh          (existing)
 ├── Makefile               (NEW)
-├── DEVELOPER_TOOLKIT.md   (NEW)
-└── SCRIPTS_SUMMARY.md     (NEW - this file)
+├── docs/reference/DEVELOPER_TOOLKIT.md   (NEW)
+└── docs/reference/SCRIPTS_SUMMARY.md     (NEW - this file)
 ```
 
 ## Quick Reference

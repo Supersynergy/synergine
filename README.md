@@ -1099,3 +1099,7 @@ MIT License. See [LICENSE](LICENSE) for details.
   Built with Synergine by <a href="https://github.com/Supersynergy">SuperSynergy</a><br>
   <em>Ship fast. Ship modern. Ship now.</em>
 </p>
+
+## Additional documentation
+
+[docs/reports](docs/reports/) · [docs/reference](docs/reference/) · [docs/guides](docs/guides/) · [docs/plans](docs/plans/) · [docs/architecture](docs/architecture/)

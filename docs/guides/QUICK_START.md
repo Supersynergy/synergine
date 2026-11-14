@@ -335,7 +335,7 @@ done
 ### Check documentation
 ```bash
 # Full configuration guide
-cat CONFIG.md
+cat docs/reference/CONFIG.md
 
 # View a service's health
 curl http://localhost:8000/health    # SurrealDB
@@ -367,7 +367,7 @@ docker-compose logs -f nats
 2. **Set up your database**: http://localhost:8000
 3. **Configure search**: http://localhost:7700
 4. **Monitor health**: http://localhost:8222 (NATS)
-5. **Read full docs**: See CONFIG.md for detailed configuration
+5. **Read full docs**: See docs/reference/CONFIG.md for detailed configuration
 
 ---
 

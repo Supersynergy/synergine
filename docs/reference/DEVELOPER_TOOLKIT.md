@@ -726,7 +726,7 @@ To add a new script:
 
 1. Create `/scripts/new-script.sh` with proper error handling
 2. Add corresponding Makefile target
-3. Update DEVELOPER_TOOLKIT.md with usage
+3. Update docs/reference/DEVELOPER_TOOLKIT.md with usage
 4. Test thoroughly before committing
 
 ---
@@ -735,9 +735,9 @@ To add a new script:
 
 - **General Help**: `make help`
 - **Script Help**: `./scripts/setup.sh -h`
-- **Configuration**: See `CONFIG.md`
-- **Quick Start**: See `QUICK_START.md`
-- **SDK Details**: See `SDK.md`
+- **Configuration**: See `docs/reference/CONFIG.md`
+- **Quick Start**: See `docs/guides/QUICK_START.md`
+- **SDK Details**: See `docs/reference/SDK.md`
 
 ---
 

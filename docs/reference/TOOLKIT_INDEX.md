@@ -5,10 +5,10 @@ Complete automation suite for frictionless SuperStack development.
 ## Quick Navigation
 
 ### For the Impatient (30 seconds)
-→ **[QUICK_COMMANDS.md](QUICK_COMMANDS.md)** — Essential commands cheatsheet
+→ **[docs/guides/QUICK_COMMANDS.md](../guides/QUICK_COMMANDS.md)** — Essential commands cheatsheet
 
 ### For First-Time Setup
-→ **[scripts/setup.sh](scripts/setup.sh)** — Run `make setup` for one-command setup
+→ **[scripts/setup.sh](../../scripts/setup.sh)** — Run `make setup` for one-command setup
 
 ### For Daily Development
 ```bash
@@ -19,7 +19,7 @@ make stop           # Stop services
 ```
 
 ### For Everything Else
-→ **[DEVELOPER_TOOLKIT.md](DEVELOPER_TOOLKIT.md)** — Complete 45-page guide
+→ **[docs/reference/DEVELOPER_TOOLKIT.md](DEVELOPER_TOOLKIT.md)** — Complete 45-page guide
 
 ---
 
@@ -29,10 +29,10 @@ make stop           # Stop services
 
 | Script | Purpose | Run with |
 |--------|---------|----------|
-| [setup.sh](scripts/setup.sh) | One-command setup (<3 min) | `make setup` |
-| [health.sh](scripts/health.sh) | System health monitoring | `make health` |
-| [backup.sh](scripts/backup.sh) | Complete backups + restore | `make backup` |
-| [upgrade.sh](scripts/upgrade.sh) | Safe rolling upgrades | `make upgrade` |
+| [setup.sh](../../scripts/setup.sh) | One-command setup (<3 min) | `make setup` |
+| [health.sh](../../scripts/health.sh) | System health monitoring | `make health` |
+| [backup.sh](../../scripts/backup.sh) | Complete backups + restore | `make backup` |
+| [upgrade.sh](../../scripts/upgrade.sh) | Safe rolling upgrades | `make upgrade` |
 
 ### Makefile (40+ targets)
 
@@ -62,9 +62,9 @@ make logs-SERVICE       # Follow specific service
 
 | Document | Purpose | Read Time |
 |----------|---------|-----------|
-| [QUICK_COMMANDS.md](QUICK_COMMANDS.md) | Cheatsheet | 5 min |
-| [DEVELOPER_TOOLKIT.md](DEVELOPER_TOOLKIT.md) | Complete guide | 20 min |
-| [SCRIPTS_SUMMARY.md](SCRIPTS_SUMMARY.md) | Implementation details | 10 min |
+| [docs/guides/QUICK_COMMANDS.md](../guides/QUICK_COMMANDS.md) | Cheatsheet | 5 min |
+| [docs/reference/DEVELOPER_TOOLKIT.md](DEVELOPER_TOOLKIT.md) | Complete guide | 20 min |
+| [docs/reference/SCRIPTS_SUMMARY.md](SCRIPTS_SUMMARY.md) | Implementation details | 10 min |
 
 ---
 
@@ -79,10 +79,10 @@ superstack/
 │   ├── upgrade.sh    ✓ NEW (477 lines)
 │   └── [4 existing scripts integrated]
 ├── Makefile          ✓ NEW (393 lines)
-├── TOOLKIT_INDEX.md  ✓ NEW (this file)
-├── QUICK_COMMANDS.md ✓ NEW
-├── DEVELOPER_TOOLKIT.md ✓ NEW
-└── SCRIPTS_SUMMARY.md ✓ NEW
+├── docs/reference/TOOLKIT_INDEX.md  ✓ NEW (this file)
+├── docs/guides/QUICK_COMMANDS.md ✓ NEW
+├── docs/reference/DEVELOPER_TOOLKIT.md ✓ NEW
+└── docs/reference/SCRIPTS_SUMMARY.md ✓ NEW
 ```
 
 ---
@@ -152,9 +152,9 @@ Start here based on what you need:
 
 **I want to...**
 
-- **Get started** → [QUICK_COMMANDS.md](QUICK_COMMANDS.md)
-- **Understand all features** → [DEVELOPER_TOOLKIT.md](DEVELOPER_TOOLKIT.md)
-- **See what was built** → [SCRIPTS_SUMMARY.md](SCRIPTS_SUMMARY.md)
+- **Get started** → [docs/guides/QUICK_COMMANDS.md](../guides/QUICK_COMMANDS.md)
+- **Understand all features** → [docs/reference/DEVELOPER_TOOLKIT.md](DEVELOPER_TOOLKIT.md)
+- **See what was built** → [docs/reference/SCRIPTS_SUMMARY.md](SCRIPTS_SUMMARY.md)
 - **Run a specific command** → `make help`
 - **Get script-specific help** → `./scripts/setup.sh -h`
 

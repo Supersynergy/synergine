@@ -156,4 +156,4 @@ make logs               # Check for errors
 
 ---
 
-See **DEVELOPER_TOOLKIT.md** for complete documentation.
+See **docs/reference/DEVELOPER_TOOLKIT.md** for complete documentation.

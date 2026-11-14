@@ -445,8 +445,8 @@ print_completion_report() {
 
     echo -e "${CYAN}Documentation:${NC}"
     echo -e "  ${GRAY}See README.md for configuration details${NC}"
-    echo -e "  ${GRAY}See CONFIG.md for all environment variables${NC}"
-    echo -e "  ${GRAY}See QUICK_START.md for common tasks${NC}"
+    echo -e "  ${GRAY}See docs/reference/CONFIG.md for all environment variables${NC}"
+    echo -e "  ${GRAY}See docs/guides/QUICK_START.md for common tasks${NC}"
     echo ""
 }
 

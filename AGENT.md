@@ -1382,8 +1382,8 @@ superstack/
 ├── env.example                # Copy to .env — all variables documented
 ├── AGENT.md                   # This file — AI agent context
 ├── README.md                  # Human-facing overview
-├── SDK.md                     # SDK detailed documentation
-├── CONFIG.md                  # Configuration reference
+├── docs/reference/SDK.md                     # SDK detailed documentation
+├── docs/reference/CONFIG.md                  # Configuration reference
 ├── package.json               # SDK package (@superstack/sdk v1.0.0)
 ├── tsconfig.json              # TypeScript config
 ├── scripts/

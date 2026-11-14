@@ -235,10 +235,10 @@ NATS_MONITOR_PASSWORD=monitor_pass
 │   ├── stop.sh                 (Service shutdown)
 │   ├── status.sh               (Service monitoring)
 │   └── init-db.sh              (Database initialization)
-├── CONFIG.md                   (Full configuration guide)
-├── QUICK_START.md              (Quick reference)
+├── docs/reference/CONFIG.md                   (Full configuration guide)
+├── docs/guides/QUICK_START.md              (Quick reference)
 ├── README.md                   (Project overview)
-└── INSTALLATION_SUMMARY.md     (This file)
+└── docs/reports/INSTALLATION_SUMMARY.md     (This file)
 ```
 
 ---
@@ -250,8 +250,8 @@ NATS_MONITOR_PASSWORD=monitor_pass
 - [x] start.sh script executable with 5 profiles
 - [x] stop.sh script with graceful and force options
 - [x] status.sh script with monitoring capabilities
-- [x] CONFIG.md with comprehensive documentation
-- [x] QUICK_START.md for quick reference
+- [x] docs/reference/CONFIG.md with comprehensive documentation
+- [x] docs/guides/QUICK_START.md for quick reference
 - [x] All scripts have bash syntax validation
 - [x] All scripts are executable (chmod +x)
 
@@ -282,8 +282,8 @@ NATS_MONITOR_PASSWORD=monitor_pass
    ```
 
 5. **Read more:**
-   - Full guide: `CONFIG.md`
-   - Quick reference: `QUICK_START.md`
+   - Full guide: `docs/reference/CONFIG.md`
+   - Quick reference: `docs/guides/QUICK_START.md`
 
 ---
 
@@ -293,7 +293,7 @@ For issues:
 1. Check logs: `./scripts/status.sh --detailed`
 2. View service logs: `docker-compose logs -f SERVICE_NAME`
 3. Force restart: `./scripts/stop.sh --force && ./scripts/start.sh dev`
-4. Read CONFIG.md troubleshooting section
+4. Read docs/reference/CONFIG.md troubleshooting section
 
 ---
 
